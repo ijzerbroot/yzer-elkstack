@@ -1,0 +1,20 @@
+
+today=`date +%Y.%m.%d`
+curl -s elasticsearch:9200/logstash-${today}/_search -H 'Content-Type: application/json' -d '{
+"_source": ["@timestamp","message"],
+"query": {
+"bool": {
+"must": [{
+"match": {
+"message": "sleeping"
+}},{
+  "range": {
+    "@timestamp": {
+      "gte": "now-5m",
+      "lt": "now"
+    }
+  }
+}]
+}
+}
+}' | jq .hits.total | sed 's/^/eschecker_runs_last_5min /'
