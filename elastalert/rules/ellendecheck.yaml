@@ -1,0 +1,12 @@
+name: Ellendecheck
+type: frequency
+index: logstash-*
+num_events: 3
+timeframe:
+    hours: 1
+filter:
+- term:
+    message: "ellende"
+alert:
+- command
+command: ["/bin/echo","{match[message]}"]
