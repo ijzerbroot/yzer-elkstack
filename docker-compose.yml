@@ -81,7 +81,7 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /cgroup:/cgroup:ro
+    #  - /cgroup:/cgroup:ro
     restart: unless-stopped
     expose:
       - 8080
@@ -150,11 +150,14 @@ services:
       - DOCKER_LABELS=true
       - LOGSTASH_TAGS="docker"
       - RETRY_STARTUP=true
+      - EXCLUDE_LABEL="org.label-schema.group:monitoring"
     command: logstash+tcp://logstash:5000
     depends_on:
       - logstash
     networks:
       - elk
+    labels:
+      org.label-schema.group: "monitoring"
 
   eschecker:
     build:
@@ -171,19 +174,19 @@ services:
       - SLEEPTIME=30
 
 
-#  elastalert:
-#    build:
-#      context: elastalert/
-#    volumes:
-#      - ./elastalert/config/elastalert.yaml:/opt/elastalert/config/elastalert.yaml
-#      - ./elastalert/rules:/opt/elastalert/rules
-#      - ./elastalert/rule_templates:/opt/elastalert/rule_templates
-#    container_name: elastalert
-#    networks:
-#      - elk
-#    depends_on:
-#      - elasticsearch
-#    restart: on-failure
+  elastalert:
+    build:
+      context: elastalert/
+    volumes:
+      - ./elastalert/config/elastalert.yaml:/opt/elastalert/config/elastalert.yaml
+      - ./elastalert/rules:/opt/elastalert/rules
+      - ./elastalert/rule_templates:/opt/elastalert/rule_templates
+    container_name: elastalert
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: on-failure
 
   filebeater:
     build:
@@ -222,6 +225,8 @@ services:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
       - elk
+    labels:
+      org.label-schema.group: "monitoring"
 
   logstash:
     build:
@@ -240,6 +245,8 @@ services:
       - elk
     depends_on:
       - elasticsearch
+    labels:
+      org.label-schema.group: "monitoring"
 
   kibana:
     build:
@@ -253,3 +260,5 @@ services:
       - elk
     depends_on:
       - elasticsearch
+    labels:
+      org.label-schema.group: "monitoring"
