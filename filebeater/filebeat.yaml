@@ -1,0 +1,14 @@
+filebeat.prospectors:
+- type: log
+  enabled: true
+  paths:
+    - /var/hostlog/*.log
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+processors:
+ - drop_event:
+     when:
+        regexp:
+           message: "^DBG:"

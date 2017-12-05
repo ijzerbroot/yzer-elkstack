@@ -81,7 +81,7 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-  #    - /cgroup:/cgroup:ro
+      - /cgroup:/cgroup:ro
     restart: unless-stopped
     expose:
       - 8080
@@ -138,9 +138,6 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
-version: '2'
-
-services:
 
   logspout:
     build:
@@ -187,6 +184,26 @@ services:
 #    depends_on:
 #      - elasticsearch
 #    restart: on-failure
+
+  filebeater:
+    build:
+      context: filebeater/
+    container_name: filebeater
+    volumes:
+      - /var/log:/var/hostlog
+    networks:
+      - elk
+
+  metricbeater:
+    build:
+      context: metricbeater/
+    container_name: metricbeater
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+    networks:
+      - elk
 
   elasticsearch:
     build:
