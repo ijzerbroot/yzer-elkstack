@@ -111,15 +111,15 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
-  eschecker-front:
-    image: nginx:1
-    container_name: eschecker-front
-    volumes:
-      - ./eschecker/web:/usr/share/nginx/html:ro
-    expose:
-      - 80
-    networks:
-      - monitor-net
+#  eschecker-front:
+#    image: nginx:1
+#    container_name: eschecker-front
+#    volumes:
+#      - ./eschecker/web:/usr/share/nginx/html:ro
+#    expose:
+#      - 80
+#    networks:
+#      - monitor-net
 
   caddy:
     image: stefanprodan/caddy
@@ -159,19 +159,19 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
-  eschecker:
-    build:
-      context: eschecker/
-    container_name: eschecker
-    volumes:
-      - ./eschecker/escheckerchecks:/escheckerchecks
-      - ./eschecker/web:/eschecker/web
-    depends_on:
-      - elasticsearch
-    networks:
-      - elk
-    environment:
-      - SLEEPTIME=30
+  #eschecker:
+  #  build:
+  #    context: eschecker/
+  #  container_name: eschecker
+  #  volumes:
+  #    - ./eschecker/escheckerchecks:/escheckerchecks
+  #    - ./eschecker/web:/eschecker/web
+  #  depends_on:
+  #    - elasticsearch
+  #  networks:
+  #    - elk
+  #  environment:
+  #    - SLEEPTIME=30
 
 
   elastalert:
