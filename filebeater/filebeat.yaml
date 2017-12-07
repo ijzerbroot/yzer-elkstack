@@ -2,7 +2,8 @@ filebeat.prospectors:
 - type: log
   enabled: true
   paths:
-    - /var/hostlog/*.log
+    - /var/hostlog/syslog
+    - /var/hostlog/mail.log
 
 output.logstash:
   hosts: ["logstash:5044"]

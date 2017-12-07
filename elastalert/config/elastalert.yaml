@@ -5,7 +5,7 @@ verify_certs: false
 es_port: 9200
 run_every:
   minutes: 1
-rules_folder: /opt/elastalert/rules
+rules_folder: rules
 # The index on es_host which is used for metadata storage
 # This can be a unmapped index, but it is recommended that you run
 # elastalert-create-index to set a mapping
@@ -20,4 +20,4 @@ alert_time_limit:
 # ElastAlert will buffer results from the most recent
 # period of time, in case some log sources are not in real time
 buffer_time:
-  minutes: 15
+  minutes: 5
