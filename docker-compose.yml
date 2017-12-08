@@ -13,6 +13,9 @@ volumes:
     esdata:
       external:
         name: esdata
+    fluentdata:
+      external:
+        name: fluentdata
 
 services:
 
