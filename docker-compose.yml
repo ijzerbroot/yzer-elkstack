@@ -170,7 +170,7 @@ services:
       - fluentdata:/fluentd/log
       - ./fluentd/etc:/fluentd/etc
     environment:
-      - FLUENTD_CONF="fluent.conf"
+      - FLUENTD_CONF=fluent.conf
     ports:
       - "24224:24224"
       - "24224:24224/udp"
