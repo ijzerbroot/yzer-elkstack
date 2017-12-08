@@ -274,7 +274,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd_address: fluentd:24224
+        fluentd-address: fluentd:24224
         tag: http.access
     networks:
       - elk
