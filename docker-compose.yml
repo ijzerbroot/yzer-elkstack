@@ -163,7 +163,9 @@ services:
 #      org.label-schema.group: "monitoring"
 
   fluentd:
-    image: fluent/fluentd:stable
+    build:
+      context: fluentd
+#    image: fluent/fluentd:stable
     container_name: fluentd
     volumes:
       - /var/log:/var/hostlog
@@ -175,7 +177,7 @@ services:
       - "24224:24224"
       - "24224:24224/udp"
     depends_on:
-      - logstash
+      - elasticsearch
     networks:
       - elk
     labels:
@@ -274,8 +276,10 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: fluentd:24224
+        fluentd-address: localhost:24224
         tag: http.access
+    depends_on:
+      - fluentd
     networks:
       - elk
 
