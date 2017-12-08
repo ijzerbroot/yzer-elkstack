@@ -139,19 +139,38 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
-  logspout:
-    build:
-      context: logspout-custom/
-    container_name: logspout
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
+#  logspout:
+#    build:
+#      context: logspout-custom/
+#    container_name: logspout
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    environment:
     #  - ROUTE_URIS="logstash+tcp://logstash:5000"
-      - DOCKER_LABELS=true
-      - LOGSTASH_TAGS="docker"
-      - RETRY_STARTUP=true
-      - EXCLUDE_LABEL="org.label-schema.group:monitoring"
-    command: logstash+tcp://logstash:5000
+#      - DOCKER_LABELS=true
+#      - LOGSTASH_TAGS="docker"
+#      - RETRY_STARTUP=true
+#      - EXCLUDE_LABEL="org.label-schema.group:monitoring"
+#    command: logstash+tcp://logstash:5000
+#    depends_on:
+#      - logstash
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
+
+  fluentd:
+    image: fluent/fluentd:stable
+    container_name: fluentd
+    volumes:
+      - /var/log:/var/hostlog
+      - fluentdata:/fluentd/log
+      - ./fluentd/etc:/fluentd/etc
+    environment:
+      - FLUENTD_CONF="fluent.conf"
+    ports:
+      - "24224:24224"
+      - "24224/udp:24224/udp"
     depends_on:
       - logstash
     networks:
