@@ -266,6 +266,19 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
+  servertje:
+    image: nginx:latest
+    container_name: servertje
+    ports:
+      - "8888:80"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd_address: fluentd:24224
+        tag: http.access
+    networks:
+      - elk
+
   logstash:
     build:
       context: logstash/
