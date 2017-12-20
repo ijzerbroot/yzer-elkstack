@@ -1,0 +1,363 @@
+version: '3.4'
+
+
+configs:
+  prometheus.yml:
+    external: true
+  alert.rules:
+    external: true
+  amconfig:
+    external: true
+  grafanadash1:
+    external: true
+  grafanadash2:
+    external: true
+  grafanadash3:
+    external: true
+  grafanadash4:
+    external: true
+  grafanads1:
+    external: true
+  grafanasetup:
+    external: true
+  fluentdconf:
+    external: true
+  fluentboot:
+    external: true
+  elastconf:
+    external: true
+
+networks:
+  elk:
+    driver: overlay
+
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
+    esdata: {}
+    fluentdata: {}
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.0.0
+    configs:
+      - source: prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        mode: 0644
+      - source: alert.rules
+        target: /etc/prometheus/alert.rules
+        mode: 0644
+    volumes:
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention=200h'
+    # restart: unless-stopped
+    expose:
+      - 9090
+    networks:
+      - elk
+    labels:
+      org.label-schema.group: "monitoring"
+
+  alertmanager:
+    image: prom/alertmanager
+    configs:
+      - source: amconfig
+        target: /etc/alertmanager/config.yml
+        mode: 0644
+    command:
+      - '-config.file=/etc/alertmanager/config.yml'
+      - '-storage.path=/alertmanager'
+    restart: unless-stopped
+    expose:
+      - 9093
+    networks:
+      - elk
+    labels:
+      org.label-schema.group: "monitoring"
+
+  nodeexporter:
+    image: prom/node-exporter:v0.15.0
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    expose:
+      - 9100
+    networks:
+      - elk
+    labels:
+      org.label-schema.group: "monitoring"
+
+  cadvisor:
+    image: google/cadvisor:v0.28.2
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+  #    - /cgroup:/cgroup:ro
+    restart: unless-stopped
+    expose:
+      - 8080
+    networks:
+      - elk
+    labels:
+      org.label-schema.group: "monitoring"
+
+  grafana:
+    image: grafana/grafana:4.5.2
+    configs:
+      - source: grafanadash1
+        target: /docker_containers.json
+        mode: 0644
+      - source: grafanadash2
+        target: /docker_host.json
+        mode: 0644
+      - source: grafanadash3
+        target: /monitor_services.json
+        mode: 0644
+      - source: grafanadash4
+        target: /nginx_container.json
+        mode: 0644
+      - source: grafanads1
+        target: /Prometheus.json
+        mode: 0644
+      - source: grafanasetup
+        target: /setup.sh
+        mode: 0755
+    volumes:
+      - grafana_data:/var/lib/grafana
+    entrypoint: /setup.sh
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    expose:
+      - 3000
+    networks:
+      - elk
+    labels:
+      org.label-schema.group: "monitoring"
+
+#  eschecker-front:
+#    image: nginx:1
+#    container_name: eschecker-front
+#    volumes:
+#      - ./eschecker/web:/usr/share/nginx/html:ro
+#    expose:
+#      - 80
+#    networks:
+#      - monitor-net
+
+#  caddy:
+#    image: stefanprodan/caddy
+#    ports:
+#      - "3000:3000"
+#      - "9090:9090"
+#      - "9093:9093"
+#    volumes:
+#      - ./caddy/:/etc/caddy/
+#    environment:
+#      - ADMIN_USER=${ADMIN_USER:-admin}
+#      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+#    restart: unless-stopped
+#    networks:
+#      - monitor-net
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
+
+#  logspout:
+#    build:
+#      context: logspout-custom/
+#    container_name: logspout
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    environment:
+    #  - ROUTE_URIS="logstash+tcp://logstash:5000"
+#      - DOCKER_LABELS=true
+#      - LOGSTASH_TAGS="docker"
+#      - RETRY_STARTUP=true
+#      - EXCLUDE_LABEL="org.label-schema.group:monitoring"
+#    command: logstash+tcp://logstash:5000
+#    depends_on:
+#      - logstash
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
+
+  fluentd:
+    image: fluent/fluentd:stable
+    configs:
+      - source: fluentdconf
+        target: /fluentd/etc/fluent.conf
+        mode: 0644
+      - source: fluentboot
+        target: /startup.sh
+        mode: 0755
+    volumes:
+      - /var/log:/var/hostlog
+      - fluentdata:/fluentd/log
+    environment:
+      - FLUENTD_CONF=fluent.conf
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
+    labels:
+      org.label-schema.group: "monitoring"
+    entrypoint: /startup.sh
+
+  #eschecker:
+  #  build:
+  #    context: eschecker/
+  #  container_name: eschecker
+  #  volumes:
+  #    - ./eschecker/escheckerchecks:/escheckerchecks
+  #    - ./eschecker/web:/eschecker/web
+  #  depends_on:
+  #    - elasticsearch
+  #  networks:
+  #    - elk
+  #  environment:
+  #    - SLEEPTIME=30
+
+
+  #elastalert:
+  #  build:
+  #    context: elastalert/
+  #  volumes:
+  #    - ./elastalert/config/elastalert.yaml:/opt/elastalert/config/elastalert.yaml
+  #    - ./elastalert/rules:/opt/elastalert/rules
+  #    - ./elastalert/rule_templates:/opt/elastalert/rule_templates
+  #  container_name: elastalert
+  #  networks:
+  #    - elk
+  #  depends_on:
+  #    - elasticsearch
+  #  restart: on-failure
+#
+#   elastalert:
+#     image: bitsensor/elastalert:latest
+#     volumes:
+#       - ./elastalert/config/elastalert.yaml:/opt/elastalert/config.yaml
+#       - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
+#       - ./elastalert/rules:/opt/elastalert/rules
+#       - ./elastalert/rule_templates:/opt/elastalert/rule_templates
+#     container_name: elastalert
+#     ports:
+#       - "3030:3030"
+#     networks:
+#       - elk
+#     depends_on:
+#       - elasticsearch
+#     restart: on-failure
+#
+#   filebeater:
+#     build:
+#       context: filebeater/
+#     container_name: filebeater
+#     volumes:
+#       - /var/log:/var/hostlog
+#     networks:
+#       - elk
+#
+#   metricbeater:
+#     build:
+#       context: metricbeater/
+#     container_name: metricbeater
+#     volumes:
+#       - /proc:/hostfs/proc:ro
+#       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+#   #    - /:/hostfs:ro
+#     networks:
+#       - elk
+#
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.0.0
+    configs:
+      - source: elastconf
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        mode: 0644
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    expose:
+      - 9200
+      - 9300
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    labels:
+      org.label-schema.group: "monitoring"
+#
+#   servertje:
+#     image: nginx:latest
+#     container_name: servertje
+#     ports:
+#       - "8888:80"
+#     logging:
+#       driver: "fluentd"
+#       options:
+#         fluentd-address: localhost:24224
+#         tag: http.access
+#     depends_on:
+#       - fluentd
+#     networks:
+#       - elk
+#
+#   logstash:
+#     build:
+#       context: logstash/
+#     container_name: logstash
+#     volumes:
+#       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+#       - ./logstash/pipeline:/usr/share/logstash/pipeline
+#     ports:
+#       - "5000:5000"
+#       - "5044:5044"
+#     environment:
+#       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+#       xpack.security.enabled: "false"
+#       LOGSPOUT: "ignore"
+#     networks:
+#       - elk
+#     depends_on:
+#       - elasticsearch
+#     labels:
+#       org.label-schema.group: "monitoring"
+#
+#   kibana:
+#     build:
+#       context: kibana/
+#     container_name: kibana
+#     volumes:
+#       - ./kibana/config/:/usr/share/kibana/config:ro
+#     ports:
+#       - "5601:5601"
+#     networks:
+#       - elk
+#     depends_on:
+#       - elasticsearch
+#     labels:
+# org.label-schema.group: "monitoring"
