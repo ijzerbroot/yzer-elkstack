@@ -2,9 +2,9 @@ version: '2.1'
 
 networks:
   monitor-net:
-    driver: bridge
+    driver: overlay
   elk:
-    driver: bridge
+    driver: overlay
 
 
 volumes:
@@ -139,6 +139,8 @@ services:
     restart: unless-stopped
     networks:
       - monitor-net
+      - elk
+
     labels:
       org.label-schema.group: "monitoring"
 
