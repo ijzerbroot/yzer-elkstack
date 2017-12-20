@@ -1,10 +1,9 @@
 version: '2.1'
 
+
 networks:
-  monitor-net:
-    driver: bridge
-  elk:
-    driver: bridge
+  flatnet:
+    external: true
 
 
 volumes:
@@ -35,7 +34,9 @@ services:
     expose:
       - 9090
     networks:
-      - monitor-net
+      flatnet:
+        aliases:
+          - prometheus
     labels:
       org.label-schema.group: "monitoring"
 
@@ -51,7 +52,9 @@ services:
     expose:
       - 9093
     networks:
-      - monitor-net
+      flatnet:
+        aliases:
+          - alertmanager
     labels:
       org.label-schema.group: "monitoring"
 
@@ -72,7 +75,9 @@ services:
     expose:
       - 9100
     networks:
-      - monitor-net
+      flatnet:
+        aliases:
+          - nodeexporter
     labels:
       org.label-schema.group: "monitoring"
 
@@ -89,7 +94,9 @@ services:
     expose:
       - 8080
     networks:
-      - monitor-net
+      flatnet:
+        aliases:
+          - cadvisor
     labels:
       org.label-schema.group: "monitoring"
 
@@ -110,7 +117,9 @@ services:
     expose:
       - 3000
     networks:
-      - monitor-net
+      flatnet:
+        aliases:
+          - grafana
     labels:
       org.label-schema.group: "monitoring"
 
@@ -138,7 +147,9 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
     restart: unless-stopped
     networks:
-      - monitor-net
+      flatnet:
+        aliases:
+          - caddy
     labels:
       org.label-schema.group: "monitoring"
 
@@ -179,7 +190,9 @@ services:
     depends_on:
       - elasticsearch
     networks:
-      - elk
+      flatnet:
+        aliases:
+          - fluentd
     labels:
       org.label-schema.group: "monitoring"
 
@@ -223,7 +236,9 @@ services:
     ports:
       - "3030:3030"
     networks:
-      - elk
+      flatnet:
+        aliases:
+          - elastalert
     depends_on:
       - elasticsearch
     restart: on-failure
@@ -235,7 +250,9 @@ services:
     volumes:
       - /var/log:/var/hostlog
     networks:
-      - elk
+      flatnet:
+        aliases:
+          - filebeater
 
   metricbeater:
     build:
@@ -246,7 +263,10 @@ services:
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
   #    - /:/hostfs:ro
     networks:
-      - elk
+      flatnet:
+        aliases:
+          - metricbeater
+
 
   elasticsearch:
     build:
@@ -264,7 +284,9 @@ services:
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
-      - elk
+      flatnet:
+        aliases:
+          - elasticsearch
     labels:
       org.label-schema.group: "monitoring"
 
@@ -281,7 +303,9 @@ services:
     depends_on:
       - fluentd
     networks:
-      - elk
+      flatnet:
+        aliases:
+          - servertje
 
   logstash:
     build:
@@ -298,7 +322,9 @@ services:
       xpack.security.enabled: "false"
       LOGSPOUT: "ignore"
     networks:
-      - elk
+      flatnet:
+        aliases:
+          - logstash
     depends_on:
       - elasticsearch
     labels:
@@ -314,7 +340,9 @@ services:
       - "5601:5601"
     networks:
       - elk
-    depends_on:
-      - elasticsearch
+    networks:
+      flatnet:
+        aliases:
+          - kibana
     labels:
       org.label-schema.group: "monitoring"
