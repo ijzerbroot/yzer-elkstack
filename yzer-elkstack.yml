@@ -3,28 +3,28 @@ version: '3.4'
 # see also: http://www.blog.labouardy.com/monitor-swarm-cluster-with-tick-stack-slack/
 
 configs:
-  prometheus.yml:
-    external: true
-  alert.rules:
-    external: true
-  amconfig:
-    external: true
-  grafanadash1:
-    external: true
-  grafanadash2:
-    external: true
-  grafanadash3:
-    external: true
-  grafanadash4:
-    external: true
-  grafanads1:
-    external: true
-  grafanasetup:
-    external: true
-  fluentdconf:
-    external: true
-  fluentboot:
-    external: true
+#  prometheus.yml:
+#    external: true
+#  alert.rules:
+#    external: true
+#  amconfig:
+#    external: true
+#  grafanadash1:
+#    external: true
+#  grafanadash2:
+#    external: true
+#  grafanadash3:
+#    external: true
+#  grafanadash4:
+#    external: true
+#  grafanads1:
+#    external: true
+#  grafanasetup:
+#    external: true
+#  fluentdconf:
+#    external: true
+#  fluentboot:
+#    external: true
   elastconf:
     external: true
   esrepo:
@@ -33,10 +33,10 @@ configs:
     external: true
   fbsetup:
     external: true
-  mbyaml:
-    external: true
-  mbsetup:
-    external: true
+#  mbyaml:
+#    external: true
+#  mbsetup:
+#    external: true
   lssetup:
     external: true
   lsyaml:
