@@ -525,11 +525,15 @@ services:
      - source: kbyaml
        target: /usr/share/kibana/config/kibana.yml
        mode: 0644
+     - source: kbsetup
+       target: /setup.sh
+       mode: 0755
    ports:
      - "5601:5601"
    networks:
      - elk
    depends_on:
      - elasticsearch
+   entrypoint: /setup.sh
    labels:
      org.label-schema.group: "monitoring"
