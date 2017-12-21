@@ -51,6 +51,8 @@ configs:
     external: true
   kapacitor-config:
     external: true
+  logtrailconfig:
+    external: true
 
 networks:
   elk:
@@ -524,6 +526,9 @@ services:
    configs:
      - source: kbyaml
        target: /usr/share/kibana/config/kibana.yml
+       mode: 0644
+     - source: logtrailconfig
+       target: /usr/share/kibana/plugins/logtrail/logtrail.json
        mode: 0644
      - source: kbsetup
        target: /setup.sh
