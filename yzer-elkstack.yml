@@ -26,6 +26,26 @@ configs:
     external: true
   elastconf:
     external: true
+  esrepo:
+    external: true
+  fbyaml:
+    external: true
+  fbsetup:
+    external: true
+  mbyaml:
+    external: true
+  mbsetup:
+    external: true
+  lssetup:
+    external: true
+  lsyaml:
+    external: true
+  lsconf:
+    external: true
+  kbyaml:
+    external: true
+  kbsetup:
+    external: true
 
 networks:
   elk:
@@ -145,6 +165,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     expose:
       - 3000
     networks:
@@ -270,26 +292,44 @@ services:
 #       - elasticsearch
 #     restart: on-failure
 #
-#   filebeater:
-#     build:
-#       context: filebeater/
-#     container_name: filebeater
-#     volumes:
-#       - /var/log:/var/hostlog
-#     networks:
-#       - elk
-#
-#   metricbeater:
-#     build:
-#       context: metricbeater/
-#     container_name: metricbeater
-#     volumes:
-#       - /proc:/hostfs/proc:ro
-#       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-#   #    - /:/hostfs:ro
-#     networks:
-#       - elk
-#
+  filebeater:
+    image: fedora:26
+    configs:
+      - source: esrepo
+        target: /etc/yum.repos.d/elastic.repo
+        mode: 0644
+      - source: fbyaml
+        target: /opt/filebeat.yaml
+        mode: 0644
+      - source: fbsetup
+        target: /setup.sh
+        mode: 0755
+    entrypoint: /setup.sh
+    volumes:
+      - /var/log:/var/hostlog
+    networks:
+     - elk
+
+  metricbeater:
+    image: fedora:26
+    configs:
+      - source: esrepo
+        target: /etc/yum.repos.d/elastic.repo
+        mode: 0644
+      - source: mbyaml
+        target: /opt/metricbeat.yaml
+        mode: 0644
+      - source: mbsetup
+        target: /setup.sh
+        mode: 0755
+    entrypoint: /setup.sh
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+    networks:
+      - elk
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.0.0
     configs:
@@ -326,6 +366,33 @@ services:
 #     networks:
 #       - elk
 #
+  logstash:
+    image: docker.elastic.co/logstash/logstash-oss:6.0.0
+    configs:
+      - source: lsconf
+        target: /usr/share/logstash/pipeline/logstash.conf
+        mode: 0644
+      - source: lsyaml
+        target: /usr/share/logstash/config/logstash.yml
+        mode: 0644
+      - source: lssetup
+        target: /setup.sh
+        mode: 0755
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      xpack.security.enabled: "false"
+      LOGSPOUT: "ignore"
+    entrypoint: /setup.sh
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
+    labels:
+      org.label-schema.group: "monitoring"
+
 #   logstash:
 #     build:
 #       context: logstash/
@@ -347,17 +414,17 @@ services:
 #     labels:
 #       org.label-schema.group: "monitoring"
 #
-#   kibana:
-#     build:
-#       context: kibana/
-#     container_name: kibana
-#     volumes:
-#       - ./kibana/config/:/usr/share/kibana/config:ro
-#     ports:
-#       - "5601:5601"
-#     networks:
-#       - elk
-#     depends_on:
-#       - elasticsearch
-#     labels:
-# org.label-schema.group: "monitoring"
+  kibana:
+   image: docker.elastic.co/kibana/kibana-oss:6.0.0
+   configs:
+     - source: kbyaml
+       target: /usr/share/kibana/config/kibana.yml
+       mode: 0644
+   ports:
+     - "5601:5601"
+   networks:
+     - elk
+   depends_on:
+     - elasticsearch
+   labels:
+     org.label-schema.group: "monitoring"
