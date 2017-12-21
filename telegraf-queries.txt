@@ -1,0 +1,38 @@
+
+create datasource InfluxDB with connection http://influxdb:8086 and database name telegraf
+
+create dashboard called "cluster" or something
+Before adding graphs, we will use a concept called Dashboard Template Variable, to create dynamic & interactive graphs. Instead of hard-coding things like node name and container name in our metric queries we will use variables in their place. So click on “Templates Varibles” in top of the dashboard created earlier. And, create a variable called :host: as follows:
+
+:host: Tag Values SHOW TAG VALUES ON vm_metrics FROM cpu_vm WITH KEY host
+
+
+# memory usage per node
+SELECT mean("free") AS "mean_free", mean("used") AS "mean_used", mean("total") AS "mean_total" FROM "vm_metrics"."autogen"."mem_vm" WHERE time > :dashboardTime: AND "host"=:host: GROUP BY :interval: FILL(null)
+
+# CPU usage per node
+SELECT mean("usage_user") AS "mean_usage_user", mean("usage_system") AS "mean_usage_system" FROM "vm_metrics"."autogen"."cpu_vm" WHERE time > :dashboardTime: AND "host"=:host: GROUP BY :interval: FILL(null)
+
+# Disk usage per node
+SELECT mean("free") AS "mean_free", mean("total") AS "mean_total", mean("used") AS "mean_used" FROM "vm_metrics"."autogen"."disk_vm" WHERE time > :dashboardTime: AND "host"=:host: GROUP BY :interval: FILL(null)
+
+create dashboard Services
+
+:container: Tag Values SHOW TAG VALUES ON docker_metrics FROM docker_container_net_docker WITH KEY com.docker.swarm.service.name
+
+# memory usage per service
+SELECT mean("usage_percent") AS "mean_usage_percent" FROM "docker_metrics"."autogen"."docker_container_mem_docker" WHERE time > :dashboardTime: AND "com.docker.swarm.service.name" = :container: GROUP BY :interval: FILL(null)
+
+# cpu usage per service
+SELECT mean("usage_percent") AS "mean_usage_percent" FROM "docker_metrics"."autogen"."docker_container_cpu_docker" WHERE time > :dashboardTime: AND "com.docker.swarm.service.name" = :container: GROUP BY :interval: FILL(null)
+
+# network usage per service
+SELECT mean("tx_packets") AS "mean_tx_packets", mean("rx_packets") AS "mean_rx_packets" FROM "docker_metrics"."autogen"."docker_container_net_docker" WHERE time > :dashboardTime: AND "com.docker.swarm.service.name" = :container: GROUP BY :interval: FILL(null)
+
+# I/O per service
+SELECT mean("io_serviced_recursive_write") AS "mean_io_recursive_write_write", mean("io_serviced_recursive_read") AS "mean_io_serviced_recursive_read" FROM "docker_metrics"."autogen"."docker_container_blkio_docker" WHERE time > :dashboardTime: AND "com.docker.swarm.service.name" = :container: GROUP BY :interval: FILL(null)
+
+
+Kapacitor:
+Add Config (for notification services)
+Create alerts

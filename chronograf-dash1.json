@@ -1,0 +1,26 @@
+{"id":1,"cells":[{"i":"0d1e35a1-72fb-4b5b-8c75-e0e398ca3c91","x":0,"y":0,"w":6,"h":4,"name":"Disk usage per node","queries":[{"query":"SELECT mean(\"free\") AS \"m
+ean_free\", mean(\"total\") AS \"mean_total\", mean(\"used\") AS \"mean_used\" FROM \"vm_metrics\".\"autogen\".\"disk_vm\" WHERE time > :dashboardTime: AND \"host\
+"=:host: GROUP BY :interval: FILL(null)","queryConfig":{"database":"","measurement":"","retentionPolicy":"","fields":[],"tags":{},"groupBy":{"time":"","tags":[]},"
+areTagsAccepted":false,"rawText":"SELECT mean(\"free\") AS \"mean_free\", mean(\"total\") AS \"mean_total\", mean(\"used\") AS \"mean_used\" FROM \"vm_metrics\".\"
+autogen\".\"disk_vm\" WHERE time > :dashboardTime: AND \"host\"=:host: GROUP BY :interval: FILL(null)","range":null},"source":"/chronograf/v1/sources/1"}],"axes":{
+"x":{"bounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linear"},"y":{"bounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linear"}
+,"y2":{"bounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linear"}},"type":"line","links":{"self":"/chronograf/v1/dashboards/1/cells/0d1e35a1-72fb
+-4b5b-8c75-e0e398ca3c91"}},{"i":"b2933fdc-86cb-4530-a155-dfe3a144fe9f","x":6,"y":0,"w":6,"h":6,"name":"CPU usage per node","queries":[{"query":"SELECT mean(\"usage
+_user\") AS \"mean_usage_user\", mean(\"usage_system\") AS \"mean_usage_system\" FROM \"vm_metrics\".\"autogen\".\"cpu_vm\" WHERE time > :dashboardTime: AND \"host
+\"=:host: GROUP BY :interval: FILL(null)","queryConfig":{"database":"","measurement":"","retentionPolicy":"","fields":[],"tags":{},"groupBy":{"time":"","tags":[]},
+"areTagsAccepted":false,"rawText":"SELECT mean(\"usage_user\") AS \"mean_usage_user\", mean(\"usage_system\") AS \"mean_usage_system\" FROM \"vm_metrics\".\"autoge
+n\".\"cpu_vm\" WHERE time > :dashboardTime: AND \"host\"=:host: GROUP BY :interval: FILL(null)","range":null},"source":"/chronograf/v1/sources/1"}],"axes":{"x":{"b
+ounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linear"},"y":{"bounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linear"},"y2":{
+"bounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linear"}},"type":"line","links":{"self":"/chronograf/v1/dashboards/1/cells/b2933fdc-86cb-4530-a
+155-dfe3a144fe9f"}},{"i":"eaaa72e0-7925-4ee8-b2f3-c1331bc44329","x":0,"y":4,"w":6,"h":4,"name":"Memory usage per node","queries":[{"query":"SELECT mean(\"free\") A
+S \"mean_free\", mean(\"used\") AS \"mean_used\", mean(\"total\") AS \"mean_total\" FROM \"vm_metrics\".\"autogen\".\"mem_vm\" WHERE time > :dashboardTime: AND \"h
+ost\"=:host: GROUP BY :interval: FILL(null)","queryConfig":{"database":"","measurement":"","retentionPolicy":"","fields":[],"tags":{},"groupBy":{"time":"","tags":[
+]},"areTagsAccepted":false,"rawText":"SELECT mean(\"free\") AS \"mean_free\", mean(\"used\") AS \"mean_used\", mean(\"total\") AS \"mean_total\" FROM \"vm_metrics\
+".\"autogen\".\"mem_vm\" WHERE time > :dashboardTime: AND \"host\"=:host: GROUP BY :interval: FILL(null)","range":null},"source":"/chronograf/v1/sources/1"}],"axes
+":{"x":{"bounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linear"},"y":{"bounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linea
+r"},"y2":{"bounds":[],"label":"","prefix":"","suffix":"","base":"10","scale":"linear"}},"type":"line","links":{"self":"/chronograf/v1/dashboards/1/cells/eaaa72e0-7
+925-4ee8-b2f3-c1331bc44329"}}],"templates":[{"tempVar":":host:","values":[{"value":"a02e8cd158ef","type":"tagValue","selected":true},{"value":"c4052475c376","type"
+:"tagValue","selected":false},{"value":"eeb18b8f80e9","type":"tagValue","selected":false},{"value":"fcbbd0d3a3a4","type":"tagValue","selected":false}],"id":"85d53d
+8d-ce3d-48b5-935f-430644592f1b","type":"tagValues","label":"","query":{"influxql":"SHOW TAG VALUES ON :database: FROM :measurement: WITH KEY=:tagKey:","db":"vm_met
+rics","measurement":"cpu_vm","tagKey":"host","fieldKey":""},"links":{"self":"/chronograf/v1/dashboards/1/templates/85d53d8d-ce3d-48b5-935f-430644592f1b"}}],"name":
+"lift-test-swarm","links":{"self":"/chronograf/v1/dashboards/1","cells":"/chronograf/v1/dashboards/1/cells","templates":"/chronograf/v1/dashboards/1/templates"}}
