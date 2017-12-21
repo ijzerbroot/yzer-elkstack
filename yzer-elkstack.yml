@@ -102,8 +102,31 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
+  docker-exporter:
+    image: basi/socat:${DOCKER_EXPORTER_VERSION:-v0.1.0}
+    networks:
+      - elk
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.05'
+          memory: 6M
+        reservations:
+          cpus: '0.05'
+          memory: 4M
+
   nodeexporter:
     image: prom/node-exporter:v0.15.0
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: '32M'
+        reservations:
+          cpus: '0.10'
+          memory: '16M'
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -122,6 +145,15 @@ services:
 
   cadvisor:
     image: google/cadvisor:v0.28.2
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: '128M'
+        reservations:
+          cpus: '0.20'
+          memory: '64M'
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -224,6 +256,8 @@ services:
 
   fluentd:
     image: fluent/fluentd:stable
+    deploy:
+      mode: global
     configs:
       - source: fluentdconf
         target: /fluentd/etc/fluent.conf
@@ -294,6 +328,8 @@ services:
 #
   filebeater:
     image: fedora:26
+    deploy:
+      mode: global
     configs:
       - source: esrepo
         target: /etc/yum.repos.d/elastic.repo
@@ -312,6 +348,8 @@ services:
 
   metricbeater:
     image: fedora:26
+    deploy:
+      mode: global
     configs:
       - source: esrepo
         target: /etc/yum.repos.d/elastic.repo
