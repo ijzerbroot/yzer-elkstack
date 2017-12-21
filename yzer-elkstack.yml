@@ -528,7 +528,7 @@ services:
        target: /usr/share/kibana/config/kibana.yml
        mode: 0644
      - source: logtrailconfig
-       target: /usr/share/kibana/plugins/logtrail/logtrail.json
+       target: /tmp/logtrailconf
        mode: 0644
      - source: kbsetup
        target: /setup.sh
