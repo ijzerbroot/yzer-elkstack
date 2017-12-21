@@ -1,5 +1,6 @@
 version: '3.4'
 
+# see also: http://www.blog.labouardy.com/monitor-swarm-cluster-with-tick-stack-slack/
 
 configs:
   prometheus.yml:
@@ -46,6 +47,10 @@ configs:
     external: true
   kbsetup:
     external: true
+  telegraf-config:
+    external: true
+  kapacitor-config:
+    external: true
 
 networks:
   elk:
@@ -60,151 +65,157 @@ volumes:
 
 services:
 
-  prometheus:
-    image: prom/prometheus:v2.0.0
-    configs:
-      - source: prometheus.yml
-        target: /etc/prometheus/prometheus.yml
-        mode: 0644
-      - source: alert.rules
-        target: /etc/prometheus/alert.rules
-        mode: 0644
-    volumes:
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention=200h'
-    # restart: unless-stopped
-    expose:
-      - 9090
-    networks:
-      - elk
-    labels:
-      org.label-schema.group: "monitoring"
+# deprecated in favor of influxdb
+#  prometheus:
+#    image: prom/prometheus:v2.0.0
+#    configs:
+#      - source: prometheus.yml
+#        target: /etc/prometheus/prometheus.yml
+#        mode: 0644
+#      - source: alert.rules
+#        target: /etc/prometheus/alert.rules
+#        mode: 0644
+#    volumes:
+#      - prometheus_data:/prometheus
+#    command:
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#      - '--storage.tsdb.path=/prometheus'
+#      - '--web.console.libraries=/etc/prometheus/console_libraries'
+#      - '--web.console.templates=/etc/prometheus/consoles'
+#      - '--storage.tsdb.retention=200h'
+#    # restart: unless-stopped
+#    expose:
+#      - 9090
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
 
-  alertmanager:
-    image: prom/alertmanager
-    configs:
-      - source: amconfig
-        target: /etc/alertmanager/config.yml
-        mode: 0644
-    command:
-      - '-config.file=/etc/alertmanager/config.yml'
-      - '-storage.path=/alertmanager'
-    restart: unless-stopped
-    expose:
-      - 9093
-    networks:
-      - elk
-    labels:
-      org.label-schema.group: "monitoring"
+# deprecated in favor of kapacitor
+#  alertmanager:
+#    image: prom/alertmanager
+#    configs:
+#      - source: amconfig
+#        target: /etc/alertmanager/config.yml
+#        mode: 0644
+#    command:
+#      - '-config.file=/etc/alertmanager/config.yml'
+#      - '-storage.path=/alertmanager'
+#    restart: unless-stopped
+#    expose:
+#      - 9093
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
 
-  docker-exporter:
-    image: basi/socat:${DOCKER_EXPORTER_VERSION:-v0.1.0}
-    networks:
-      - elk
-    deploy:
-      mode: global
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 6M
-        reservations:
-          cpus: '0.05'
-          memory: 4M
+# deprecated in favor of telegraf
+#  docker-exporter:
+#    image: basi/socat:${DOCKER_EXPORTER_VERSION:-v0.1.0}
+#    networks:
+#      - elk
+#    deploy:
+#      mode: global
+#      resources:
+#        limits:
+#          cpus: '0.05'
+#          memory: 6M
+#        reservations:
+#          cpus: '0.05'
+#          memory: 4M
 
-  nodeexporter:
-    image: prom/node-exporter:v0.15.0
-    deploy:
-      mode: global
-      resources:
-        limits:
-          cpus: '0.10'
-          memory: '32M'
-        reservations:
-          cpus: '0.10'
-          memory: '16M'
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
-    restart: unless-stopped
-    expose:
-      - 9100
-    networks:
-      - elk
-    labels:
-      org.label-schema.group: "monitoring"
+# deprecated in favor of telegraf
+#  nodeexporter:
+#    image: prom/node-exporter:v0.15.0
+#    deploy:
+#      mode: global
+#      resources:
+#        limits:
+#          cpus: '0.10'
+#          memory: '32M'
+#        reservations:
+#          cpus: '0.10'
+#          memory: '16M'
+#    volumes:
+#      - /proc:/host/proc:ro
+#      - /sys:/host/sys:ro
+#      - /:/rootfs:ro
+#    command:
+#      - '--path.procfs=/host/proc'
+#      - '--path.sysfs=/host/sys'
+#      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+#    restart: unless-stopped
+#    expose:
+#      - 9100
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
 
-  cadvisor:
-    image: google/cadvisor:v0.28.2
-    deploy:
-      mode: global
-      resources:
-        limits:
-          cpus: '0.20'
-          memory: '128M'
-        reservations:
-          cpus: '0.20'
-          memory: '64M'
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
+# deprecated in favor of telegraf
+#  cadvisor:
+#    image: google/cadvisor:v0.28.2
+#    deploy:
+#      mode: global
+#      resources:
+#        limits:
+#          cpus: '0.20'
+#          memory: '128M'
+#        reservations:
+#          cpus: '0.20'
+#          memory: '64M'
+#    volumes:
+#      - /:/rootfs:ro
+#      - /var/run:/var/run:rw
+#      - /sys:/sys:ro
+#      - /var/lib/docker/:/var/lib/docker:ro
   #    - /cgroup:/cgroup:ro
-    restart: unless-stopped
-    expose:
-      - 8080
-    networks:
-      - elk
-    labels:
-      org.label-schema.group: "monitoring"
+#    restart: unless-stopped
+#    expose:
+#      - 8080
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
 
-  grafana:
-    image: grafana/grafana:4.5.2
-    configs:
-      - source: grafanadash1
-        target: /docker_containers.json
-        mode: 0644
-      - source: grafanadash2
-        target: /docker_host.json
-        mode: 0644
-      - source: grafanadash3
-        target: /monitor_services.json
-        mode: 0644
-      - source: grafanadash4
-        target: /nginx_container.json
-        mode: 0644
-      - source: grafanads1
-        target: /Prometheus.json
-        mode: 0644
-      - source: grafanasetup
-        target: /setup.sh
-        mode: 0755
-    volumes:
-      - grafana_data:/var/lib/grafana
-    entrypoint: /setup.sh
-    environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    expose:
-      - 3000
-    networks:
-      - elk
-    labels:
-      org.label-schema.group: "monitoring"
+# deprecated in favor of chronograf
+#  grafana:
+#    image: grafana/grafana:4.5.2
+#    configs:
+#      - source: grafanadash1
+#        target: /docker_containers.json
+#        mode: 0644
+#      - source: grafanadash2
+#        target: /docker_host.json
+#        mode: 0644
+#      - source: grafanadash3
+#        target: /monitor_services.json
+#        mode: 0644
+#      - source: grafanadash4
+#        target: /nginx_container.json
+#        mode: 0644
+#      - source: grafanads1
+#        target: /Prometheus.json
+#        mode: 0644
+#      - source: grafanasetup
+#        target: /setup.sh
+#        mode: 0755
+#    volumes:
+#      - grafana_data:/var/lib/grafana
+#    entrypoint: /setup.sh
+#    environment:
+#      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+#      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+#      - GF_USERS_ALLOW_SIGN_UP=false
+#    restart: unless-stopped
+#    ports:
+#      - "3000:3000"
+#    expose:
+#      - 3000
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
 
 #  eschecker-front:
 #    image: nginx:1
@@ -254,32 +265,33 @@ services:
 #    labels:
 #      org.label-schema.group: "monitoring"
 
-  fluentd:
-    image: fluent/fluentd:stable
-    deploy:
-      mode: global
-    configs:
-      - source: fluentdconf
-        target: /fluentd/etc/fluent.conf
-        mode: 0644
-      - source: fluentboot
-        target: /startup.sh
-        mode: 0755
-    volumes:
-      - /var/log:/var/hostlog
-      - fluentdata:/fluentd/log
-    environment:
-      - FLUENTD_CONF=fluent.conf
-    ports:
-      - "24224:24224"
-      - "24224:24224/udp"
-    depends_on:
-      - elasticsearch
-    networks:
-      - elk
-    labels:
-      org.label-schema.group: "monitoring"
-    entrypoint: /startup.sh
+# Not yet ready
+#  fluentd:
+#    image: fluent/fluentd:stable
+#    deploy:
+#      mode: global
+#    configs:
+#      - source: fluentdconf
+#        target: /fluentd/etc/fluent.conf
+#        mode: 0644
+#      - source: fluentboot
+#        target: /startup.sh
+#        mode: 0755
+#    volumes:
+#      - /var/log:/var/hostlog
+#      - fluentdata:/fluentd/log
+#    environment:
+#      - FLUENTD_CONF=fluent.conf
+#    ports:
+#      - "24224:24224"
+#      - "24224:24224/udp"
+#    depends_on:
+#      - elasticsearch
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
+#    entrypoint: /startup.sh
 
   #eschecker:
   #  build:
@@ -326,6 +338,7 @@ services:
 #       - elasticsearch
 #     restart: on-failure
 #
+
   filebeater:
     image: fedora:26
     deploy:
@@ -346,27 +359,80 @@ services:
     networks:
      - elk
 
-  metricbeater:
-    image: fedora:26
-    deploy:
-      mode: global
-    configs:
-      - source: esrepo
-        target: /etc/yum.repos.d/elastic.repo
-        mode: 0644
-      - source: mbyaml
-        target: /opt/metricbeat.yaml
-        mode: 0644
-      - source: mbsetup
-        target: /setup.sh
-        mode: 0755
-    entrypoint: /setup.sh
-    volumes:
-      - /proc:/hostfs/proc:ro
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /:/hostfs:ro
+  telegraf:
+    image: telegraf:1.3
     networks:
       - elk
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    configs:
+      - source: telegraf-config
+        target: /etc/telegraf/telegraf.conf
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: global
+
+  influxdb:
+    image: influxdb:1.2
+    networks:
+      - elk
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == worker
+
+  chronograf:
+    image: chronograf:1.3
+    networks:
+      - elk
+    ports:
+      - 8888:8888
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+
+  kapacitor:
+    image: kapacitor:1.2
+    networks:
+      - elk
+    configs:
+      - source: kapacitor-config
+        target: /etc/kapacitor/kapacitor.conf
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == worker
+
+# no longer necessary with telegraf and kapacitor
+#  metricbeater:
+#    image: fedora:26
+#    deploy:
+#      mode: global
+#    configs:
+#      - source: esrepo
+#        target: /etc/yum.repos.d/elastic.repo
+#        mode: 0644
+#      - source: mbyaml
+#        target: /opt/metricbeat.yaml
+#        mode: 0644
+#      - source: mbsetup
+#        target: /setup.sh
+#        mode: 0755
+#    entrypoint: /setup.sh
+#    volumes:
+#      - /proc:/hostfs/proc:ro
+#      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+#      - /:/hostfs:ro
+#    networks:
+#      - elk
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.0.0

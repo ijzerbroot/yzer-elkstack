@@ -4,6 +4,7 @@ filebeat.prospectors:
   paths:
     - /var/hostlog/syslog
     - /var/hostlog/mail.log
+    - /var/log/telegraf-alerts.log
 
 output.logstash:
   hosts: ["logstash:5044"]
