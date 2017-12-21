@@ -20,7 +20,7 @@
             "hostname" : "host",
             "message": "message"
         },
-        "message_format": "{{{syslog_message}}}"
+        "message_format": "{{{message}}}"
       },
       "color_mapping" : {
       }
