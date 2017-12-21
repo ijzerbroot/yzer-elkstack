@@ -35,4 +35,4 @@ SELECT mean("io_serviced_recursive_write") AS "mean_io_recursive_write_write", m
 
 Kapacitor:
 Add Config (for notification services)
-Create alerts
+Create alerts to /var/hostlog/telegraf-alerts.log

@@ -365,6 +365,7 @@ services:
       - elk
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log:/var/hostlog
     configs:
       - source: telegraf-config
         target: /etc/telegraf/telegraf.conf
