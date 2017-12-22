@@ -377,7 +377,7 @@ services:
       mode: global
 
   influxdb:
-    image: influxdb:1.2
+    image: influxdb:1.4
     networks:
       - elk
     deploy:
