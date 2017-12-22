@@ -1,16 +1,10 @@
 filebeat.prospectors:
 - type: log
-  enabled: true
   paths:
-    - /var/hostlog/syslog
-    - /var/hostlog/mail.log
-    - /var/hostlog/telegraf-alerts.log
-
-output.logstash:
-  hosts: ["logstash:5044"]
-
-processors:
- - drop_event:
-     when:
-        regexp:
-           message: "^DBG:"
+   - '/var/lib/docker/containers/*/*.log'
+  json.message_key: log
+  json.keys_under_root: true
+  processors:
+  - add_docker_metadata: ~
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
