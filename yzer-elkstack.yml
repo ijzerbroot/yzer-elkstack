@@ -362,7 +362,7 @@ services:
      - elk
 
   telegraf:
-    image: telegraf:1.3
+    image: telegraf:1.5
     networks:
       - elk
     volumes:
@@ -377,7 +377,7 @@ services:
       mode: global
 
   influxdb:
-    image: influxdb:1.4
+    image: influxdb:1.4.2
     networks:
       - elk
     deploy:
@@ -388,7 +388,7 @@ services:
           - node.role == worker
 
   chronograf:
-    image: chronograf:1.3
+    image: chronograf:1.3.10.0
     networks:
       - elk
     ports:
@@ -401,7 +401,7 @@ services:
           - node.role == manager
 
   kapacitor:
-    image: kapacitor:1.2
+    image: kapacitor:1.4
     networks:
       - elk
     configs:
