@@ -3,7 +3,7 @@ filebeat.prospectors:
   paths:
    - '/var/lib/docker/containers/*/*.log'
    - '/var/hostlog/messages'
-  exclude_lines: ['influxdb','filebeater','kibana','telegraf','HTTP/1.1" 2','^\[I\]','json.go:32: ERR Error decoding JSON','metrics.go:39','chronograf','level=info msg=']
+  exclude_lines: ['influxdb','filebeater','kibana','telegraf','HTTP/1.1" 2','^\[I\]','json.go:32: ERR Error decoding JSON','metrics.go:39','chronograf','level=info msg=','"url":"/logtrail']
   json.message_key: log
   json.keys_under_root: true
   processors:
