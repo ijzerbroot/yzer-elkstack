@@ -2,6 +2,7 @@ filebeat.prospectors:
 - type: log
   paths:
    - '/var/lib/docker/containers/*/*.log'
+   - '/var/hostlog/messages'
   json.message_key: log
   json.keys_under_root: true
   processors:

@@ -352,22 +352,17 @@ services:
           condition: none
 
   filebeater:
-    image: fedora:26
+    image: docker.elastic.co/beats/filebeat:6.1.1
     deploy:
       mode: global
     configs:
-      - source: esrepo
-        target: /etc/yum.repos.d/elastic.repo
-        mode: 0644
       - source: fbyaml
-        target: /opt/filebeat.yaml
+        target: /etc/filebeat.yaml
         mode: 0644
-      - source: fbsetup
-        target: /setup.sh
-        mode: 0755
-    entrypoint: /setup.sh
+    command: -c /etc/filebeat.yml -e
     volumes:
       - /var/log:/var/hostlog
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
      - elk
 
@@ -377,7 +372,6 @@ services:
       - elk
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /var/log:/var/hostlog
     configs:
       - source: telegraf-config
         target: /etc/telegraf/telegraf.conf
@@ -396,6 +390,9 @@ services:
       placement:
         constraints:
           - node.role == worker
+    volumes:
+      - /nfsdata/influxdb/meta:/var/lib/influxdb/meta
+      - /nfsdata/influxdb/data:/var/lib/influxdb/data
 
   chronograf:
     image: chronograf:1.3
@@ -403,6 +400,8 @@ services:
       - elk
     ports:
       - 8888:8888
+    volumes:
+      - /nfsdata/chronograf:/var/lib/chronograf
     deploy:
       restart_policy:
         condition: on-failure
@@ -414,6 +413,8 @@ services:
     image: kapacitor:1.4
     networks:
       - elk
+    volumes:
+      - /nfsdata/kapacitor:/var/lib/kapacitor
     configs:
       - source: kapacitor-config
         target: /etc/kapacitor/kapacitor.conf
@@ -454,7 +455,7 @@ services:
         target: /usr/share/elasticsearch/config/elasticsearch.yml
         mode: 0644
     volumes:
-      - esdata:/usr/share/elasticsearch/data
+      - /nfsdata/elasticsearch/data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -483,32 +484,32 @@ services:
 #     networks:
 #       - elk
 #
-  logstash:
-    image: docker.elastic.co/logstash/logstash-oss:6.1.1
-    configs:
-      - source: lsconf
-        target: /usr/share/logstash/pipeline/logstash.conf
-        mode: 0644
-      - source: lsyaml
-        target: /usr/share/logstash/config/logstash.yml
-        mode: 0644
-      - source: lssetup
-        target: /setup.sh
-        mode: 0755
-    ports:
-      - "5000:5000"
-      - "5044:5044"
-    environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
-      xpack.security.enabled: "false"
-      LOGSPOUT: "ignore"
-    entrypoint: /setup.sh
-    depends_on:
-      - elasticsearch
-    networks:
-      - elk
-    labels:
-      org.label-schema.group: "monitoring"
+#  logstash:
+#    image: docker.elastic.co/logstash/logstash-oss:6.1.1
+#    configs:
+#      - source: lsconf
+#        target: /usr/share/logstash/pipeline/logstash.conf
+#        mode: 0644
+#      - source: lsyaml
+#        target: /usr/share/logstash/config/logstash.yml
+#        mode: 0644
+#      - source: lssetup
+#        target: /setup.sh
+#        mode: 0755
+#    ports:
+#      - "5000:5000"
+#      - "5044:5044"
+#    environment:
+#      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+#      xpack.security.enabled: "false"
+#      LOGSPOUT: "ignore"
+#    entrypoint: /setup.sh
+#    depends_on:
+#      - elasticsearch
+#    networks:
+#      - elk
+#    labels:
+#      org.label-schema.group: "monitoring"
 
 #   logstash:
 #     build:
@@ -532,23 +533,23 @@ services:
 #       org.label-schema.group: "monitoring"
 #
   kibana:
-   image: docker.elastic.co/kibana/kibana-oss:6.1.0
-   configs:
-     - source: kbyaml
-       target: /usr/share/kibana/config/kibana.yml
-       mode: 0644
-     - source: logtrailconfig
-       target: /tmp/logtrailconf
-       mode: 0644
-     - source: kbsetup
-       target: /setup.sh
-       mode: 0755
+   image: localhost/kibana-logtrail:1
+#   configs:
+#     - source: kbyaml
+#       target: /usr/share/kibana/config/kibana.yml
+#       mode: 0644
+#     - source: logtrailconfig
+#       target: /tmp/logtrailconf
+#       mode: 0644
+#     - source: kbsetup
+#       target: /setup.sh
+#       mode: 0755
    ports:
      - "5601:5601"
    networks:
      - elk
    depends_on:
      - elasticsearch
-   entrypoint: /setup.sh
+#   entrypoint: /setup.sh
    labels:
      org.label-schema.group: "monitoring"
