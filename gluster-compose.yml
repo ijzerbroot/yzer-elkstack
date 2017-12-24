@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+
+  glusterfs:
+    image: gluster/gluster-centos
+    volumes:
+      - /etc/glusterfs:/etc/glusterfs:z
+      - /var/lib/glusterd:/var/lib/glusterd:z
+      - /var/log/glusterfs:/var/log/glusterfs:z
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /dev/:/dev
+      - /data:/data
+    privileged: true
+    network_mode: host

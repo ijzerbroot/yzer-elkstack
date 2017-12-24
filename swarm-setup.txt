@@ -1,0 +1,87 @@
+
+Install Ubuntu 16.04 without swap
+Set private network-adapter (192.168.1.10 for master)
+sudo apt-get install openssh-server git
+sudo systemctl enable ssh
+sudo systemctl disable ufw
+sudo systemctl stop ufw
+
+sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get -y update
+sudo apt-get -y install docker-ce
+sudo apt-get -y install git docker-compose curl
+
+# Voor Centos:
+sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum -y install docker-ce epel-release
+sudo systemctl enable docker && sudo systemctl start docker
+sudo yum install -y python-pip curl
+sudo pip install docker-compose
+disable selinux
+sudo systemctl disable firewalld
+
+ALL MACHINES:
+sudo sysctl -w vm.max_map_count=262144
+sudo sysctl -w net.bridge.bridge-nf-call-iptables=1
+net.ipv4.ip_forward = 1
+
+# In swarm we are allowed to use swap
+# Add swap file
+sudo dd if=/dev/zero of=/swapfile bs=1024 count=1500000
+# set permissions
+sudo chmod 600 /swapfile
+# Make it swap
+sudo mkswap /swapfile
+# Enable
+sudo swapon /swapfile
+# And at boot
+sudo bash -c "echo '/swapfile swap swap defaults 0 0' >> /etc/fstab"
+
+
+# on all nodes:
+sudo add-apt-repository ppa:gluster/glusterfs-3.12
+sudo apt-get update
+sudo apt-get install glusterfs-client
+CENTOS:
+yum -y install centos-release-gluster
+yum -y install glusterfs
+yum -y install glusterfs-fuse
+
+
+
+# on manager:
+sudo docker swarm init --advertise-addr 192.168.1.10
+# on worker (example)
+sudo docker swarm join --token SWMTKN-1-4u8fqrphixklissphjaz8rwtg76zhmoqlq7n1qfnd1cpx3ub7c-0i6y29ss4yr5bi72z14dk4a2j 192.168.1.10:2377
+
+on manager:
+sudo mkdir -p /etc/glusterfs
+sudo mkdir -p /var/lib/glusterd
+sudo mkdir -p /var/log/glusterfs
+sudo mkdir -p /data/brick1
+# Deploy the gluster-compose (glusterfs server needs priviliged so cannot run in swarm-mode)
+sudo docker-compose -f gluster-compose.yml up -d
+
+#go into gluster container and do:
+# make subdirs:
+mkdir -p /data/brick1/gv0
+
+
+#gluster volume create gv0 replica 2 server1:/data/brick1/gv0 server2:/data/brick1/gv0
+#gluster volume create gv1 replica 2 server1:/data/brick1/gv1 server2:/data/brick1/gv1
+#gluster volume create gv2 replica 2 server1:/data/brick1/gv2 server2:/data/brick1/gv2
+#gluster volume create gv3 replica 2 server1:/data/brick1/gv3 server2:/data/brick1/gv3
+#gluster volume create gv4 replica 2 server1:/data/brick1/gv4 server2:/data/brick1/gv4
+gluster volume create gv0 192.168.1.10:/data/brick1/gv0
+
+gluster volume start gv0
+
+
+# on all nodes and manager:
+sudo mkdir -p /glustervols/gv0
+
+# build the glusterfs client from dockerfile on each machine
+#sudo docker-compose -f glusterclient-compose up -d

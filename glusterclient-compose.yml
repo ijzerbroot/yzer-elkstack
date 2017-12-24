@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+
+  glusterfsclient:
+    image: centos:7
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /dev/:/dev
+      - /glustervols:/glustervols
+    entrypoint: /setup.sh
+    privileged: true
+    network_mode: host
