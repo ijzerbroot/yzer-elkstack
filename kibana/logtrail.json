@@ -17,7 +17,7 @@
     "mapping" : {
         "timestamp" : "@timestamp",
         "display_timestamp" : "@timestamp",
-        "host" : "docker.container.labels.com.docker.swarm.service.name",
+        "hostname" : "docker.container.labels.com.docker.swarm.service.name",
         "message": "log"
     },
     "message_format": "{{{log}}}"
