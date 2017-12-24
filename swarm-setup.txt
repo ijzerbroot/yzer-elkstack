@@ -95,6 +95,7 @@ mkdir -p /nfsdata/chronograf
 mkdir -p /nfsdata/kapacitor
 mkdir -p /nfsdata/elasticsearch/data
 mkdir -p /nfsdata/portainer
+mkdir -p /nfsdata/swarmpit-data
 
 # Deploy the gluster-compose (glusterfs server needs priviliged so cannot run in swarm-mode)
 #sudo docker-compose -f gluster-compose.yml up -d
@@ -140,3 +141,7 @@ PEERS="$PEERS $peer"
 done
 sudo /usr/local/bin/scope launch $PEERS
 docker update --restart=always weavescope
+
+install swarmpit
+git clone https://github.com/swarmpit/swarmpit
+docker stack deploy -c swarmpit-compose.yml swarmpit
