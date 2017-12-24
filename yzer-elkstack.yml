@@ -341,7 +341,7 @@ services:
       mode: global
     configs:
       - source: fbyaml
-        target: /etc/filebeat.yaml
+        target: /etc/filebeat.yml
         mode: 0644
     command: -c /etc/filebeat.yml -e
     volumes:
