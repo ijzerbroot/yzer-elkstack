@@ -344,9 +344,11 @@ services:
         target: /etc/filebeat.yml
         mode: 0644
     command: -c /etc/filebeat.yml -e
+    user: root
     volumes:
-      - /var/log:/var/hostlog
+      - /var/log:/var/hostlog:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
      - elk
     depends_on:
