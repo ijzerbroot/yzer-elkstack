@@ -85,7 +85,7 @@ op manager:
 exportfs -a
 
 op workers:
-echo '192.168.1.10:/nfsdata  /nfsdata   nfs      rw,sync,hard,intr  0     0' >> /etc/fstab
+echo '192.168.1.10:/nfsdata  /nfsdata   nfs      rw,sync,soft,intr  0     0' >> /etc/fstab
 mount /nfsdata
 
 on manager:
@@ -119,8 +119,13 @@ mount -t glusterfs 192.168.1.10:/gv0 /glustervols/gv0
 # build the glusterfs client from dockerfile on each machine
 #sudo docker-compose -f glusterclient-compose up -d
 
-install portainer from portainer-compose.yml
+install portainer MANUALY on manager:
+docker run -d -p 9000:9000 --restart always -v /var/run/docker.sock:/var/run/docker.sock -v /nfsdata/portainer:/data portainer/portainer
 
 build the kibana image on every system
 set the configs
+- fbyaml -> configs.filebeat.yaml
+- telegraf-config -> configs/telegraf-config
+- kapacitor-config -> configs/kapacitor-config
+- elastconf -> configs/elasticsearch.yml
 deploy the stack
