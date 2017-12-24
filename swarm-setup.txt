@@ -94,6 +94,7 @@ mkdir -p /nfsdata/influxdb/data
 mkdir -p /nfsdata/chronograf
 mkdir -p /nfsdata/kapacitor
 mkdir -p /nfsdata/elasticsearch/data
+mkdir -p /nfsdata/portainer
 
 # Deploy the gluster-compose (glusterfs server needs priviliged so cannot run in swarm-mode)
 #sudo docker-compose -f gluster-compose.yml up -d
@@ -117,3 +118,9 @@ mkdir -p /glustervols/gv0
 mount -t glusterfs 192.168.1.10:/gv0 /glustervols/gv0
 # build the glusterfs client from dockerfile on each machine
 #sudo docker-compose -f glusterclient-compose up -d
+
+install portainer from portainer-compose.yml
+
+build the kibana image on every system
+set the configs
+deploy the stack
