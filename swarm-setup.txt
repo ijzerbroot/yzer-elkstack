@@ -120,7 +120,7 @@ mount -t glusterfs 192.168.1.10:/gv0 /glustervols/gv0
 #sudo docker-compose -f glusterclient-compose up -d
 
 install portainer MANUALY on manager:
-docker run -d -p 9000:9000 --restart always -v /var/run/docker.sock:/var/run/docker.sock -v /nfsdata/portainer:/data portainer/portainer
+docker run -d -p 9000:9000 --restart always --name portainer -v /var/run/docker.sock:/var/run/docker.sock -v /nfsdata/portainer:/data portainer/portainer
 
 build the kibana image on every system
 set the configs
@@ -129,3 +129,14 @@ set the configs
 - kapacitor-config -> configs/kapacitor-config
 - elastconf -> configs/elasticsearch.yml
 deploy the stack
+
+
+manually start scope on all systems and make it autostart:
+sudo curl -L git.io/scope -o /usr/local/bin/scope
+sudo chmod a+x /usr/local/bin/scope
+for peer in `netstat -n | grep 2377 | awk '{ print $(NF-1) }' | sed 's/:.*//'`
+do
+PEERS="$PEERS $peer"
+done
+sudo /usr/local/bin/scope launch $PEERS
+docker update --restart=always weavescope

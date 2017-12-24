@@ -325,24 +325,26 @@ services:
 #     restart: on-failure
 #
 
-  scope-launcher:
-    image: weaveworks/scope-swarm-launcher
-    command: scope launch
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    deploy:
-      mode: global
-      restart_policy:
-          condition: none
+#  scope-launcher:
+#    image: weaveworks/scope-swarm-launcher
+#    command: scope launch
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    deploy:
+#      mode: global
+#      restart_policy:
+#          condition: none
 
-  scope:
-    image: weaveworks/scope:1.6.5
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    deploy:
-      mode: global
-    depends_on:
-     - scope-launcher
+#  scope:
+#    image: weaveworks/scope:1.6.5
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    deploy:
+#      mode: global
+#    ports:
+#      - "4040:4040"
+#    depends_on:
+#      - scope-launcher
 
   filebeater:
     image: docker.elastic.co/beats/filebeat:6.1.1
