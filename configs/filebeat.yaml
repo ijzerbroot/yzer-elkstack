@@ -8,5 +8,9 @@ filebeat.prospectors:
   json.keys_under_root: true
   processors:
   - add_docker_metadata: ~
+  - drop_event:
+      when:
+        contains:
+          docker.container.image: ceph/daemon
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
