@@ -2,6 +2,18 @@ version: '3.4'
 
 # see also: http://www.blog.labouardy.com/monitor-swarm-cluster-with-tick-stack-slack/
 
+# create the following direectories on the ceph storage:
+# influxdb/meta
+# influxdb/data
+# chronograf
+# kapacitor
+# elasticsearch/data
+
+# upload the configs
+# label the worker nodes
+# build kibana: localhost/kibana-logtrail:6.1.1
+
+
 configs:
 #  prometheus.yml:
 #    external: true
@@ -27,8 +39,8 @@ configs:
 #    external: true
   elastconf:
     external: true
-  esrepo:
-    external: true
+#  esrepo:
+#    external: true
   fbyaml:
     external: true
   telegraf-config:
@@ -43,11 +55,25 @@ networks:
     driver: overlay
 
 
-volumes:
-    prometheus_data: {}
-    grafana_data: {}
-    esdata: {}
-    fluentdata: {}
+#volumes:
+#    prometheus_data:
+#      external:
+#        name: prometheusdata
+#    grafana_data:
+#      external:
+#        name: grafanadata
+#    esdata:
+#      external:
+#        name: esdata
+#    fluentdata:
+#      external:
+#        name: fluentdata
+#    influxmeta:
+#      external:
+#        name: influxmeta
+#    influxdata:
+#      external:
+#        name: influxdata
 
 services:
 
@@ -390,8 +416,8 @@ services:
         constraints:
           - node.role == worker
     volumes:
-      - /nfsdata/influxdb/meta:/var/lib/influxdb/meta
-      - /nfsdata/influxdb/data:/var/lib/influxdb/data
+      - /cephdata/storage/influxdb/meta:/var/lib/influxdb/meta
+      - /cephdata/storage/influxdb/data:/var/lib/influxdb/data
 
   chronograf:
     image: chronograf:1.3
@@ -400,20 +426,17 @@ services:
     ports:
       - 8888:8888
     volumes:
-      - /nfsdata/chronograf:/var/lib/chronograf
+      - /cephdata/chronograf:/var/lib/chronograf
     deploy:
       restart_policy:
         condition: on-failure
-      placement:
-        constraints:
-          - node.role == manager
 
   kapacitor:
     image: kapacitor:1.4
     networks:
       - elk
     volumes:
-      - /nfsdata/kapacitor:/var/lib/kapacitor
+      - /cephdata/storage/kapacitor:/var/lib/kapacitor
     configs:
       - source: kapacitor-config
         target: /etc/kapacitor/kapacitor.conf
@@ -454,7 +477,7 @@ services:
         target: /usr/share/elasticsearch/config/elasticsearch.yml
         mode: 0644
     volumes:
-      - /nfsdata/elasticsearch/data:/usr/share/elasticsearch/data
+      - /cephdata/storage/elasticsearch/data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -467,6 +490,12 @@ services:
       - elk
     labels:
       org.label-schema.group: "monitoring"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == worker
 #
 #   servertje:
 #     image: nginx:latest
@@ -532,7 +561,7 @@ services:
 #       org.label-schema.group: "monitoring"
 #
   kibana:
-   image: localhost/kibana-logtrail:1
+   image: localhost/kibana-logtrail:6.1.1
 #   configs:
 #     - source: kbyaml
 #       target: /usr/share/kibana/config/kibana.yml
