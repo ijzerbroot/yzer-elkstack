@@ -7,7 +7,7 @@ version: '3.4'
 # influxdb/data
 # chronograf
 # kapacitor
-# elasticsearch/data
+# elasticsearch/data (owner uid 1000)
 
 # upload the configs
 # label the worker nodes
