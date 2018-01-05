@@ -426,13 +426,16 @@ services:
     ports:
       - 8888:8888
     volumes:
-      - /cephdata/chronograf:/var/lib/chronograf
+      - /cephdata/storage/chronograf:/var/lib/chronograf
     deploy:
       restart_policy:
         condition: on-failure
+      placement:
+        constraints:
+          - node.role == worker
 
   kapacitor:
-    image: kapacitor:1.4
+    image: kapacitor:1.4.0
     networks:
       - elk
     volumes:
