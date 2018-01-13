@@ -300,6 +300,27 @@ services:
 #        - "traefik.http.frontend.entryPoints=http"
 #        - "traefik.http.port=80"
 
+  unsee:
+    image: cloudflare/unsee:v0.8.0
+    networks:
+      - traefik
+      - infra
+    environment:
+      - "ALERTMANAGER_URIS=default:http://alertmanager:9093"
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "traefik.port=8080"
+        - "traefik.docker.network=traefik"
+        - "traefik.backend=unsee"
+        - "traefik.backend.loadbalancer.method=wrr"
+        - "traefik.enable=true"
+        - "traefik.frontend.entryPoints=http"
+        - "traefik.frontend.rule=Host:unsee.localswarm"
+#        - "traefik.http.frontend.entryPoints=http"
+#        - "traefik.http.port=80"
+
 #  eschecker-front:
 #    image: nginx:1
 #    container_name: eschecker-front
