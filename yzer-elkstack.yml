@@ -105,227 +105,212 @@ services:
         constraints:
           - node.role == manager
 
-  prometheus:
-    image: prom/prometheus:v2.0.0
-    configs:
-      - source: prometheus.yml
-        target: /etc/prometheus/prometheus.yml
-        mode: 0644
-      - source: alert.rules
-        target: /etc/prometheus/alert.rules
-        mode: 0644
-    volumes:
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention=200h'
-#    restart: unless-stopped
-#    ports:
-#      - "9090"
-    networks:
-      - infra
-      - traefik
-    labels:
-      org.label-schema.group: "monitoring"
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == worker
-      labels:
-        - "traefik.port=9090"
-        - "traefik.docker.network=traefik"
-        - "traefik.backend=prometheus"
-        - "traefik.backend.loadbalancer.method=wrr"
-        - "traefik.enable=true"
-        - "traefik.frontend.entryPoints=http"
-        - "traefik.frontend.rule=Host:prometheus.localswarm"
-#        - "traefik.http.frontend.entryPoints=http"
-#        - "traefik.http.port=80"
+#  prometheus:
+#    image: prom/prometheus:v2.0.0
+#    configs:
+#      - source: prometheus.yml
+#        target: /etc/prometheus/prometheus.yml
+#        mode: 0644
+#      - source: alert.rules
+#        target: /etc/prometheus/alert.rules
+#        mode: 0644
+#    volumes:
+#      - prometheus_data:/prometheus
+#    command:
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#      - '--storage.tsdb.path=/prometheus'
+#      - '--web.console.libraries=/etc/prometheus/console_libraries'
+#      - '--web.console.templates=/etc/prometheus/consoles'
+#      - '--storage.tsdb.retention=200h'
+#    networks:
+#      - infra
+#      - traefik
+#    labels:
+#      org.label-schema.group: "monitoring"
+#    deploy:
+#      replicas: 1
+#      placement:
+#        constraints:
+#          - node.role == worker
+#      labels:
+#        - "traefik.port=9090"
+#        - "traefik.docker.network=traefik"
+#        - "traefik.backend=prometheus"
+#        - "traefik.backend.loadbalancer.method=wrr"
+#        - "traefik.enable=true"
+#        - "traefik.frontend.entryPoints=http"
+#        - "traefik.frontend.rule=Host:prometheus.localswarm"
 
-  alertmanager:
-    image: prom/alertmanager
-    configs:
-      - source: amconfig
-        target: /etc/alertmanager/config.yml
-        mode: 0644
-    command:
-      - '--config.file=/etc/alertmanager/config.yml'
-      - '--storage.path=/alertmanager'
-#    restart: unless-stopped
-#    ports:
-#      - "9093"
-    networks:
-      - infra
-      - traefik
-    labels:
-      org.label-schema.group: "monitoring"
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == worker
-      labels:
-        - "org.label-schema.group=monitoring"
-        - "traefik.port=9093"
-        - "traefik.docker.network=traefik"
-        - "traefik.backend=alertmanager"
-        - "traefik.backend.loadbalancer.method=wrr"
-        - "traefik.enable=true"
-        - "traefik.frontend.entryPoints=http"
-        - "traefik.frontend.rule=Host:alertmanager.localswarm"
+#  alertmanager:
+#    image: prom/alertmanager
+#    configs:
+#      - source: amconfig
+#        target: /etc/alertmanager/config.yml
+#        mode: 0644
+#    command:
+#      - '--config.file=/etc/alertmanager/config.yml'
+#      - '--storage.path=/alertmanager'
+#    networks:
+#      - infra
+#      - traefik
+#    labels:
+#      org.label-schema.group: "monitoring"
+#    deploy:
+#      replicas: 1
+#      placement:
+#        constraints:
+#          - node.role == worker
+#      labels:
+#        - "org.label-schema.group=monitoring"
+#        - "traefik.port=9093"
+#        - "traefik.docker.network=traefik"
+#        - "traefik.backend=alertmanager"
+#        - "traefik.backend.loadbalancer.method=wrr"
+#        - "traefik.enable=true"
+#        - "traefik.frontend.entryPoints=http"
+#        - "traefik.frontend.rule=Host:alertmanager.localswarm"
 
 # deprecated in favor of telegraf
-  docker-exporter:
-    image: basi/socat:${DOCKER_EXPORTER_VERSION:-v0.1.0}
-    networks:
-      - infra
-    deploy:
-      mode: global
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 6M
-        reservations:
-          cpus: '0.05'
-          memory: 4M
+#  docker-exporter:
+#    image: basi/socat:${DOCKER_EXPORTER_VERSION:-v0.1.0}
+#    networks:
+#      - infra
+#    deploy:
+#      mode: global
+#      resources:
+#        limits:
+#          cpus: '0.05'
+#          memory: 6M
+#        reservations:
+#          cpus: '0.05'
+#          memory: 4M
 
 # deprecated in favor of telegraf
-  nodeexporter:
-    image: stefanprodan/swarmprom-node-exporter
-    configs:
-      - source: necustomrun
-        target: /customrun.sh
-        mode: 0755
-    networks:
-      - infra
-    environment:
-      - NODE_ID={{.Node.ID}}
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-      - /etc/hostname:/etc/nodename
-    entrypoint:
-      - /customrun.sh
-    command:
-      - '-collector.textfile.directory=/etc/node-exporter/'
-      - '-collector.procfs=/host/proc'
-      - '-collector.sysfs=/host/sys'
-      - '-collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
-      - '-collectors.enabled=textfile,conntrack,diskstats,entropy,filefd,filesystem,loadavg,mdadm,meminfo,netdev,netstat,stat,time,vmstat'
-    deploy:
-      mode: global
+#  nodeexporter:
+#    image: stefanprodan/swarmprom-node-exporter
+#    configs:
+#      - source: necustomrun
+#        target: /customrun.sh
+#        mode: 0755
+#    networks:
+#      - infra
+#    environment:
+#      - NODE_ID={{.Node.ID}}
+#    volumes:
+#      - /proc:/host/proc:ro
+#      - /sys:/host/sys:ro
+#      - /:/rootfs:ro
+#      - /etc/hostname:/etc/nodename
+#    entrypoint:
+#      - /customrun.sh
+#    command:
+#      - '-collector.textfile.directory=/etc/node-exporter/'
+#      - '-collector.procfs=/host/proc'
+#      - '-collector.sysfs=/host/sys'
+#      - '-collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+#      - '-collectors.enabled=textfile,conntrack,diskstats,entropy,filefd,filesystem,loadavg,mdadm,meminfo,netdev,netstat,stat,time,vmstat'
+#    deploy:
+#      mode: global
 
 # deprecated in favor of telegraf
-  cadvisor:
-    image: google/cadvisor:v0.28.3
-    deploy:
-      mode: global
-      resources:
-        limits:
-          cpus: '0.20'
-          memory: '128M'
-        reservations:
-          cpus: '0.20'
-          memory: '64M'
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
+#  cadvisor:
+#    image: google/cadvisor:v0.28.3
+#    deploy:
+#      mode: global
+#      resources:
+#        limits:
+#          cpus: '0.20'
+#          memory: '128M'
+#        reservations:
+#          cpus: '0.20'
+#          memory: '64M'
+#    volumes:
+#      - /:/rootfs:ro
+#      - /var/run:/var/run:rw
+#      - /sys:/sys:ro
+#      - /var/lib/docker/:/var/lib/docker:ro
   #    - /cgroup:/cgroup:ro
   #  restart: unless-stopped
 #    ports:
 #      - "8080"
-    networks:
-      - infra
-    labels:
-      org.label-schema.group: "monitoring"
+#    networks:
+#      - infra
+#    labels:
+#      org.label-schema.group: "monitoring"
 
 # deprecated in favor of chronograf
-  grafana:
-    image: grafana/grafana:4.6.0
-    configs:
-      - source: grafanadash1
-        target: /docker_containers.json
-        mode: 0644
-      - source: grafanadash2
-        target: /docker_host.json
-        mode: 0644
-      - source: grafanadash3
-        target: /monitor_services.json
-        mode: 0644
-      - source: grafanadash4
-        target: /nginx_container.json
-        mode: 0644
-      - source: grafanadash5
-        target: /nodes_dash.json
-        mode: 0644
-      - source: grafanadash6
-        target: /prometheus_dash.json
-        mode: 0644
-      - source: grafanadash7
-        target: /services_dash.json
-        mode: 0644
-      - source: grafanads1
-        target: /Prometheus.json
-        mode: 0644
-      - source: grafanasetup
-        target: /setup.sh
-        mode: 0755
-    volumes:
-      - grafana_data:/var/lib/grafana
-    entrypoint: /setup.sh
-    environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-  #  restart: unless-stopped
-  #  ports:
-  #    - "3000:3000"
-#    ports:
-#      - "3000"
-    networks:
-      - infra
-      - traefik
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == worker
-      labels:
-        - "traefik.port=3000"
-        - "traefik.docker.network=traefik"
-        - "traefik.backend=grafana"
-        - "traefik.backend.loadbalancer.method=wrr"
-        - "traefik.enable=true"
-        - "traefik.frontend.entryPoints=http"
-        - "traefik.frontend.rule=Host:grafana.localswarm"
-#        - "traefik.http.frontend.entryPoints=http"
-#        - "traefik.http.port=80"
+#  grafana:
+#    image: grafana/grafana:4.6.0
+#    configs:
+#      - source: grafanadash1
+#        target: /docker_containers.json
+#        mode: 0644
+#      - source: grafanadash2
+#        target: /docker_host.json
+#        mode: 0644
+#      - source: grafanadash3
+#        target: /monitor_services.json
+#        mode: 0644
+#      - source: grafanadash4
+#        target: /nginx_container.json
+#        mode: 0644
+#      - source: grafanadash5
+#        target: /nodes_dash.json
+#        mode: 0644
+#      - source: grafanadash6
+#        target: /prometheus_dash.json
+#        mode: 0644
+#      - source: grafanadash7
+#        target: /services_dash.json
+#        mode: 0644
+#      - source: grafanads1
+#        target: /Prometheus.json
+#        mode: 0644
+#      - source: grafanasetup
+#        target: /setup.sh
+#        mode: 0755
+#    volumes:
+#      - grafana_data:/var/lib/grafana
+#    entrypoint: /setup.sh
+#    environment:
+#      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+#      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+#      - GF_USERS_ALLOW_SIGN_UP=false
+#    networks:
+#      - infra
+#      - traefik
+#    deploy:
+#      replicas: 1
+#      placement:
+#        constraints:
+#          - node.role == worker
+#      labels:
+#        - "traefik.port=3000"
+#        - "traefik.docker.network=traefik"
+#        - "traefik.backend=grafana"
+#        - "traefik.backend.loadbalancer.method=wrr"
+#        - "traefik.enable=true"
+#        - "traefik.frontend.entryPoints=http"
+#        - "traefik.frontend.rule=Host:grafana.localswarm"
 
-  unsee:
-    image: cloudflare/unsee:v0.8.0
-    networks:
-      - traefik
-      - infra
-    environment:
-      - "ALERTMANAGER_URIS=default:http://alertmanager:9093"
-    deploy:
-      mode: replicated
-      replicas: 1
-      labels:
-        - "traefik.port=8080"
-        - "traefik.docker.network=traefik"
-        - "traefik.backend=unsee"
-        - "traefik.backend.loadbalancer.method=wrr"
-        - "traefik.enable=true"
-        - "traefik.frontend.entryPoints=http"
-        - "traefik.frontend.rule=Host:unsee.localswarm"
+#  unsee:
+#    image: cloudflare/unsee:v0.8.0
+#    networks:
+#      - traefik
+#      - infra
+#    environment:
+#      - "ALERTMANAGER_URIS=default:http://alertmanager:9093"
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      labels:
+#        - "traefik.port=8080"
+#        - "traefik.docker.network=traefik"
+#        - "traefik.backend=unsee"
+#        - "traefik.backend.loadbalancer.method=wrr"
+#        - "traefik.enable=true"
+#        - "traefik.frontend.entryPoints=http"
+#        - "traefik.frontend.rule=Host:unsee.localswarm"
 #        - "traefik.http.frontend.entryPoints=http"
 #        - "traefik.http.port=80"
 
