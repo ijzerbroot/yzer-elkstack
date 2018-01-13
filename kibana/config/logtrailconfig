@@ -3,7 +3,7 @@
   "index_patterns" : [
     {
       "es": {
-        "default_index": "logstash-*"
+        "default_index": "filebeat-*"
       },
       "tail_interval_in_seconds": 10,
       "es_index_time_offset_in_seconds": 0,
@@ -17,8 +17,8 @@
         "mapping" : {
             "timestamp" : "@timestamp",
             "display_timestamp" : "@timestamp",
-            "hostname" : "host",
-            "message": "message"
+            "hostname" : "docker.container.labels.com.docker.swarm.service.name",
+            "message": "log"
         },
         "message_format": "{{{message}}}"
       },

@@ -59,6 +59,8 @@ configs:
     external: true
   logtrailconfig:
     external: true
+  necustomrun:
+    external: true
 
 networks:
   infra:
@@ -194,6 +196,10 @@ services:
 # deprecated in favor of telegraf
   nodeexporter:
     image: stefanprodan/swarmprom-node-exporter
+    configs:
+      - source: necustomrun
+        target: /customrun.sh
+        mode: 0755
     networks:
       - infra
     environment:
@@ -203,6 +209,8 @@ services:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
       - /etc/hostname:/etc/nodename
+    entrypoint:
+      - /customrun.sh
     command:
       - '-collector.textfile.directory=/etc/node-exporter/'
       - '-collector.procfs=/host/proc'
@@ -214,7 +222,7 @@ services:
 
 # deprecated in favor of telegraf
   cadvisor:
-    image: google/cadvisor:v0.28.2
+    image: google/cadvisor:v0.28.3
     deploy:
       mode: global
       resources:

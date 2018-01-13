@@ -18,3 +18,4 @@ sudo docker config create kbyaml kibana/config/kibana.yml
 sudo docker config create logtrailconfig kibana/config/logtrailconfig
 sudo docker config create kapacitor-config configs/kapacitor-config
 sudo docker config create telegraf-config configs/telegraf-config
+sudo docker config create necustomrun configs/necustomrun.sh
