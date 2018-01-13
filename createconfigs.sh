@@ -6,6 +6,9 @@ sudo docker config create grafanadash1 grafana/dashboards/docker_containers.json
 sudo docker config create grafanadash2 grafana/dashboards/docker_host.json
 sudo docker config create grafanadash3 grafana/dashboards/monitor_services.json
 sudo docker config create grafanadash4 grafana/dashboards/nginx_container.json
+sudo docker config create grafanadash5 grafana/dashboards/nodes_dash.json
+sudo docker config create grafanadash6 grafana/dashboards/prometheus_dash.json
+sudo docker config create grafanadash7 grafana/dashboards/services_dash.json
 sudo docker config create grafanads1 grafana/datasources/Prometheus.json
 sudo docker config create grafanasetup grafana/setup.sh
 sudo docker config create elastconf elasticsearch/config/elasticsearch.yml
@@ -13,3 +16,5 @@ sudo docker config create fbyaml configs/filebeat.yaml
 sudo docker config create kbsetup kibana/setup.sh
 sudo docker config create kbyaml kibana/config/kibana.yml
 sudo docker config create logtrailconfig kibana/config/logtrailconfig
+sudo docker config create kapacitor-config configs/kapacitor-config
+sudo docker config create telegraf-config configs/telegraf-config
