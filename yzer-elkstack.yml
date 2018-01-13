@@ -240,7 +240,7 @@ services:
 
 # deprecated in favor of chronograf
   grafana:
-    image: grafana/grafana:4.5.2
+    image: grafana/grafana:4.6.0
     configs:
       - source: grafanadash1
         target: /docker_containers.json
