@@ -1,9 +1,6 @@
 {
-  "dashboard" : {
-    "annotations": {
-      "list": []
-    },
     "description": "Docker Swarm nodes metrics",
+    "title": "Swarm Nodes",
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
@@ -25,7 +22,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 1,
             "format": "s",
             "gauge": {
@@ -106,7 +103,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 0,
             "format": "none",
             "gauge": {
@@ -184,7 +181,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 0,
             "format": "short",
             "gauge": {
@@ -265,7 +262,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": null,
             "format": "percent",
             "gauge": {
@@ -354,7 +351,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 2,
             "fill": 1,
             "id": 13,
@@ -435,7 +432,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 2,
             "fill": 1,
             "id": 14,
@@ -532,7 +529,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 1,
             "format": "decbytes",
             "gauge": {
@@ -613,7 +610,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "format": "percent",
             "gauge": {
               "maxValue": 100,
@@ -690,7 +687,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 1,
             "format": "decbytes",
             "gauge": {
@@ -771,7 +768,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "format": "percent",
             "gauge": {
               "maxValue": 100,
@@ -856,7 +853,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": null,
+            "datasource": "Prometheus",
             "fill": 1,
             "id": 15,
             "legend": {
@@ -954,7 +951,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 2,
             "fill": 1,
             "id": 16,
@@ -1041,7 +1038,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 2,
             "fill": 1,
             "id": 18,
@@ -1128,7 +1125,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 2,
             "fill": 1,
             "id": 19,
@@ -1221,7 +1218,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": null,
+            "datasource": "Prometheus",
             "decimals": 0,
             "fill": 3,
             "id": 12,
@@ -1308,7 +1305,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": null,
+            "datasource": "Prometheus",
             "format": "none",
             "gauge": {
               "maxValue": 100,
@@ -1392,7 +1389,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": null,
+            "datasource": "Prometheus",
             "fill": 1,
             "id": 17,
             "legend": {
@@ -1686,6 +1683,4 @@
     "timezone": "",
     "title": "Docker Swarm Nodes",
     "version": 15
-  },
-  "overwrite" : false
 }

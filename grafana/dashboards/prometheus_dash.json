@@ -1,8 +1,6 @@
 {
-  "dashboard" : {
-    "annotations": {
-      "list": []
-    },
+    "description": "Docker Prometheus metrics",
+    "title": "Prometheus overview",
     "editable": true,
     "gnetId": null,
     "graphTooltip": 1,
@@ -1168,8 +1166,5 @@
       ]
     },
     "timezone": "",
-    "title": "Prometheus",
     "version": 5
-  },
-  "overwrite" : false
 }
