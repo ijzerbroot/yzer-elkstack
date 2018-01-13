@@ -500,7 +500,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - stacktype == monitoring
+          - node.stacktype == monitoring
     volumes:
       - influxdbmeta:/var/lib/influxdb/meta
       - influxdbdata:/var/lib/influxdb/data
@@ -517,7 +517,7 @@ services:
         condition: on-failure
       placement:
         constraints:
-          - stacktype == monitoring
+          - node.stacktype == monitoring
       labels:
         - "traefik.port=8888"
         - "traefik.docker.network=traefik"
@@ -543,7 +543,7 @@ services:
         condition: on-failure
       placement:
         constraints:
-          - stacktype == monitoring
+          - node.stacktype == monitoring
 
 # no longer necessary with telegraf and kapacitor
 #  metricbeater:
@@ -590,7 +590,7 @@ services:
         condition: on-failure
       placement:
         constraints:
-          - purpose == data
+          - node.purpose == data
 #
 #   servertje:
 #     image: nginx:latest
@@ -689,4 +689,4 @@ services:
       replicas: 1
       placement:
         constraints:
-          - stacktype == monitoring
+          - node.stacktype == monitoring
