@@ -1,5 +1,4 @@
 {
-  "version" : 1,
   "index_patterns" : [
     {
       "es": {
@@ -17,10 +16,11 @@
         "mapping" : {
             "timestamp" : "@timestamp",
             "display_timestamp" : "@timestamp",
-            "hostname" : "docker.container.labels.com.docker.swarm.service.name",
+            "hostname": "beat.hostname"
+            "program" : "docker.container.labels.com.docker.swarm.service.name",
             "message": "log"
         },
-        "message_format": "{{{message}}}"
+        "message_format": "{{{log}}}"
       },
       "color_mapping" : {
       }

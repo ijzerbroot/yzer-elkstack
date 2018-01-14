@@ -656,7 +656,8 @@ services:
 #       org.label-schema.group: "monitoring"
 #
   kibana:
-    image: docker.elastic.co/kibana/kibana:6.1.1
+#    image: docker.elastic.co/kibana/kibana-oss:6.1.1
+    image: localhost/kibana-logtrail:6.1.1
     configs:
       - source: kbyaml
         target: /usr/share/kibana/config/kibana.yml
@@ -689,4 +690,4 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.stacktype == monitoring
+          - node.labels.kibana == true
