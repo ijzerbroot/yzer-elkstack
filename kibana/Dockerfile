@@ -8,5 +8,5 @@ RUN kibana-plugin install https://github.com/sivasamyk/logtrail/releases/downloa
 ADD logtrail.json /usr/share/kibana/plugins/logtrail/logtrail.json
 # Add your kibana plugins setup here
 # Example: RUN kibana-plugin install <name|url>
-RUN kibana-plugin remove x-pack
+#RUN kibana-plugin remove x-pack
 #RUN kibana-plugin install https://github.com/sirensolutions/sentinl/releases/download/tag-6.0.0/sentinl-v6.0.0.zip

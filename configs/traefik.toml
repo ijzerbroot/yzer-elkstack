@@ -1,0 +1,19 @@
+# traefik.toml
+defaultEntryPoints = ["http","management"]
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+  [entryPoints.management]
+  address = ":8888"
+  #[entrypoints.http.auth.basic]
+  #users = ["admin:i65CC8Y.7SCIc"]
+  #  [entryPoints.http.redirect]
+  #  entryPoint = "https"
+  #[entryPoints.https]
+  #address = ":443"
+  #[entryPoints.https.tls]
+  #minVersion = "VersionTLS12"
+  #cipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","TLS_RSA_WITH_AES_256_GCM_SHA384"]
+  #  [[entryPoints.https.tls.certificates]]
+  #  certFile = "certs/cert.crt"
+  #  keyFile = "certs/key.key"

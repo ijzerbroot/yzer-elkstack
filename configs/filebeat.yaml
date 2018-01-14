@@ -12,5 +12,17 @@ filebeat.prospectors:
       when:
         contains:
           docker.container.image: ceph/daemon
+  - drop_event:
+      when:
+        contains:
+          docker.container.labels.com.docker.swarm.service.name: yzer-elkstack_kibana
+  - drop_event:
+      when:
+        contains:
+          docker.container.labels.com.docker.swarm.service.name: yzer-elkstack_chronograf
+  - drop_event:
+      when:
+        contains:
+          docker.container.labels.com.docker.swarm.service.name: yzer-elkstack_telegraf
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]

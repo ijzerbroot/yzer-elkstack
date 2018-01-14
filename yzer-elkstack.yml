@@ -61,6 +61,8 @@ configs:
     external: true
   necustomrun:
     external: true
+  traefik-config:
+    external: true
 
 networks:
   infra:
@@ -93,12 +95,16 @@ services:
     image: traefik
     networks:
       - traefik
-    command: --web --docker.swarmmode --docker.domain=lift --docker.watch --docker.endpoint=unix://var/run/docker.sock -l INFO
+    command: --web --docker.swarmmode --docker.domain=lift --docker.watch --docker.endpoint=unix://var/run/docker.sock --configfile=/config/traefik.toml -l INFO
     ports:
       - "80:80"
+      - "8888:8888"
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    configs:
+      - source: traefik-config
+        target: /config/traefik.toml
     deploy:
       replicas: 1
       placement:
@@ -517,17 +523,15 @@ services:
         condition: on-failure
       placement:
         constraints:
-          - node.labels.stacktype == monitoring
+          - node.labels.chronograf == true
       labels:
         - "traefik.port=8888"
         - "traefik.docker.network=traefik"
         - "traefik.backend=chronograf"
         - "traefik.backend.loadbalancer.method=wrr"
         - "traefik.enable=true"
-        - "traefik.frontend.entryPoints=http"
+        - "traefik.frontend.entryPoints=management"
         - "traefik.frontend.rule=Host:chronograf.lift"
-#         - "traefik.http.frontend.entryPoints=http"
-#         - "traefik.http.port=80"
 
   kapacitor:
     image: kapacitor:1.4
@@ -543,7 +547,7 @@ services:
         condition: on-failure
       placement:
         constraints:
-          - node.labels.stacktype == monitoring
+          - node.labels.kapacitor == true
 
 # no longer necessary with telegraf and kapacitor
 #  metricbeater:
@@ -590,7 +594,7 @@ services:
         condition: on-failure
       placement:
         constraints:
-          - node.labels.purpose == data
+          - node.labels.elasticsearch == true
 #
 #   servertje:
 #     image: nginx:latest
@@ -675,7 +679,7 @@ services:
       - traefik
     depends_on:
       - elasticsearch
-    entrypoint: /setup.sh
+#    entrypoint: /setup.sh
     labels:
        org.label-schema.group: "monitoring"
     deploy:
@@ -685,7 +689,7 @@ services:
          - "traefik.backend=kibana"
          - "traefik.backend.loadbalancer.method=wrr"
          - "traefik.enable=true"
-         - "traefik.frontend.entryPoints=http"
+         - "traefik.frontend.entryPoints=management"
          - "traefik.frontend.rule=Host:kibana.lift"
       replicas: 1
       placement:

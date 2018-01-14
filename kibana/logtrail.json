@@ -22,8 +22,15 @@
     },
     "message_format": "{{{log}}}"
   },
-  "color_mapping" : {
-    }
+  "color_mapping": {
+        "field": "docker.container.labels.org.label-schema.group",
+        "mapping": {
+          "system": "#FF0000",
+          "data": "#FFEF96",
+          "app": "#B5E7A0",
+          "monitoring": "#CFE0E8"
+        }
+      }
   }
  ]
 }
