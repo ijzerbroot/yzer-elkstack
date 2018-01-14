@@ -1,0 +1,31 @@
+version: '3.4'
+
+configs:
+  traefik-config:
+    external: true
+
+networks:
+  traefik:
+    external:
+      name: traefik
+
+services:
+  traefik:
+    image: traefik:1.5
+    networks:
+      - traefik
+    command: --web --docker.swarmmode --docker.domain=lift --docker.watch --docker.endpoint=unix://var/run/docker.sock --configfile=/config/traefik.toml -l INFO
+    ports:
+      - "80:80"
+      - "8888:8888"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    configs:
+      - source: traefik-config
+        target: /config/traefik.toml
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager

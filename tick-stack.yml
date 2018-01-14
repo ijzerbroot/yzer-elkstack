@@ -1,0 +1,95 @@
+version: '3.4'
+
+# see also: http://www.blog.labouardy.com/monitor-swarm-cluster-with-tick-stack-slack/
+
+configs:
+  telegraf-config:
+    external: true
+  kapacitor-config:
+    external: true
+
+networks:
+  infra:
+    driver: overlay
+  traefik:
+    external:
+      name: traefik
+
+volumes:
+    kapacitordata:
+      name: kapacitordata
+    chronografdata:
+      name: chronografdata
+    influxdbmeta:
+      name: influxdbmeta
+    influxdbdata:
+      name: influxdbdata
+
+services:
+
+  telegraf:
+    image: telegraf:1.5
+    networks:
+      - infra
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    configs:
+      - source: telegraf-config
+        target: /etc/telegraf/telegraf.conf
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: global
+
+  influxdb:
+    image: influxdb:1.4
+    networks:
+      - infra
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.influxdb == true
+    volumes:
+      - influxdbmeta:/var/lib/influxdb/meta
+      - influxdbdata:/var/lib/influxdb/data
+
+  chronograf:
+    image: chronograf:1.4
+    networks:
+      - infra
+      - traefik
+    volumes:
+      - chronografdata:/var/lib/chronograf
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.chronograf == true
+      labels:
+        - "traefik.port=8888"
+        - "traefik.docker.network=traefik"
+        - "traefik.backend=chronograf"
+        - "traefik.backend.loadbalancer.method=wrr"
+        - "traefik.enable=true"
+        - "traefik.frontend.entryPoints=management"
+        - "traefik.frontend.rule=Host:chronograf.lift"
+
+  kapacitor:
+    image: kapacitor:1.4
+    networks:
+      - infra
+    volumes:
+      - kapacitordata:/var/lib/kapacitor
+    configs:
+      - source: kapacitor-config
+        target: /etc/kapacitor/kapacitor.conf
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.kapacitor == true
