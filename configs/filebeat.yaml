@@ -24,5 +24,9 @@ filebeat.prospectors:
       when:
         contains:
           docker.container.labels.com.docker.swarm.service.name: yzer-elkstack_telegraf
+  - drop_event:
+      when:
+        contains:
+          docker.container.labels.com.docker.swarm.service.name: yzer-elkstack_filebeater
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
