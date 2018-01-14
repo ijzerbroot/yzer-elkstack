@@ -244,7 +244,7 @@ services:
         - "traefik.frontend.entryPoints=http"
         - "traefik.frontend.rule=Host:unsee.lift"
         - "traefik.http.frontend.entryPoints=management"
-@        - "traefik.http.port=80"
+#        - "traefik.http.port=80"
 
 
 #  caddy:
