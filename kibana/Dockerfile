@@ -5,7 +5,7 @@ FROM docker.elastic.co/kibana/kibana-oss:6.1.1
 
 RUN kibana-plugin install https://github.com/sivasamyk/logtrail/releases/download/v0.1.25/logtrail-6.1.1-0.1.25.zip
 
-ADD logtrail.json /usr/share/kibana/plugins/logtrail/logtrail.json
+ADD config/logtrailconfig /usr/share/kibana/plugins/logtrail/logtrail.json
 # Add your kibana plugins setup here
 # Example: RUN kibana-plugin install <name|url>
 #RUN kibana-plugin remove x-pack

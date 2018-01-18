@@ -1,11 +1,38 @@
+global:
+  # ResolveTimeout is the time after which an alert is declared resolved
+  # if it has not been updated.
+  resolve_timeout: 24h
+
+
+# Files from which custom notification template definitions are read.
+# The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'.
+#templates:
+#  [ - <filepath> ... ]
+
+# The root route with all parameters, which are inherited by the child
+# routes if they are not overwritten.
 route:
-    receiver: 'slack'
+  receiver: 'slack'
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  group_by: [cluster, alertname]
+  # All alerts that do not match the following child routes
+  # will remain at the root node and be dispatched to 'default-receiver'.
 
 receivers:
+    - name: 'default-receiver'
+      email_configs:
+        - send_resolved: true
+          html: '{{ template "email.default.html" . }}'
+          to: frank@lift.cards
+          from: alertmanager@swarm.test.lift.cards
+          smarthost: localhost
+
     - name: 'slack'
       slack_configs:
-          - send_resolved: true
-            text: "{{ .CommonAnnotations.description }}"
-            username: 'Prometheus'
-            channel: '#<channel-name>'
-            api_url: 'https://hooks.slack.com/services/<webhook-id>'
+        - send_resolved: true
+          text: "{{ .CommonAnnotations.description }}"
+          username: 'Prometheus'
+          channel: '#ops-exceptions'
+          api_url: 'https://hooks.slack.com/services/token'

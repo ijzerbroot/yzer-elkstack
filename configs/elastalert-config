@@ -1,0 +1,11 @@
+rules_folder: ./rules
+buffer_time:
+    minutes: 15
+run_every:
+    minutes: 1
+es_host: elasticsearch
+es_port: 9200
+use_ssl: False
+writeback_index: elastalert
+alert_time_limit:
+    days: 2

@@ -1,0 +1,15 @@
+name: Test rule
+type: frequency
+index: filebeat-*
+num_events: 50
+timeframe:
+    minutes: 5
+filter:
+    - term:
+        fields.env: "testalert"
+    - term:
+        filename: "testalert"
+alert:
+    - "email"
+email:
+    - "root@localhost"

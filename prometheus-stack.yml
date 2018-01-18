@@ -108,9 +108,8 @@ services:
         - "traefik.frontend.entryPoints=management"
         - "traefik.frontend.rule=Host:alertmanager.lift"
 
-
   docker-exporter:
-    image: basi/socat:${DOCKER_EXPORTER_VERSION:-v1.15.0}
+    image: basi/socat:v1.15.0
     networks:
       - infra
     deploy:
@@ -165,7 +164,8 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /cgroup:/cgroup:ro
+      - /dev/disk/:/dev/disk:ro
+#      - /var/lib/lxcfs/cgroup:/cgroup:ro
     networks:
       - infra
     labels:

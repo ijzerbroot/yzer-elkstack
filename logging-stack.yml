@@ -18,6 +18,10 @@ configs:
     external: true
   logtrailconfig:
     external: true
+  graylog.conf:
+    external: true
+  graylog-log4j2.xml:
+    external: true
 
 networks:
   infra:
@@ -29,6 +33,12 @@ networks:
 volumes:
     esdata:
       name: esdata
+    graylogconfig:
+      name: graylogconfig
+    graylogjournal:
+      name: graylogjournal
+    graylogmongodata:
+      name: graylogmongodata
 
 services:
 
@@ -51,6 +61,30 @@ services:
     depends_on:
      - elasticsearch
 
+  elastalert-server:
+    image: bitsensor/elastalert:latest
+    configs:
+      - source: elastalert-config
+        target: /opt/elastalert/config.yaml
+        mode: 0644
+      - source: elastalert-rules
+        target: /opt/elastalert/rules/rules.yaml
+        mode: 0644
+      - source: elastalert-server-config
+        target: /opt/elastalert-server/config/config.json
+        mode: 0644
+    networks:
+      - infra
+    labels:
+      org.label-schema.group: "monitoring"
+    depends_on:
+      - elasticsearch
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.elasticsearch != true
 
 # no longer necessary with telegraf and kapacitor
 #  metricbeater:

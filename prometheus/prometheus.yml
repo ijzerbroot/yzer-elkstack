@@ -12,16 +12,17 @@ rule_files:
   - "targets.rules"
   - "host.rules"
   - "containers.rules"
+  - "alert.rules"
 
 # A scrape configuration containing exactly one endpoint to scrape.
 scrape_configs:
 
-  - job_name: 'docker-exporter'
-    dns_sd_configs:
-    - names:
-      - 'tasks.docker-exporter'
-      type: 'A'
-      port: 9323
+#  - job_name: 'docker-exporter'
+#    dns_sd_configs:
+#    - names:
+#      - 'tasks.docker-exporter'
+#      type: 'A'
+#      port: 9323
 
   - job_name: 'cadvisor'
     dns_sd_configs:
