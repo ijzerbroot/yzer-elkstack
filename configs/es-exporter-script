@@ -8,7 +8,7 @@ while sleep 15
 do
 
 cat /dev/null > /data/newmetrics
-DATUM="`%Y.%m.%d`"
+DATUM="`date +%Y.%m.%d`"
 
 curl -s -X GET http://elasticsearch:9200/filebeat-*-${DATUM}/_search -H 'Content-Type: application/json' -d "
 {
@@ -23,7 +23,7 @@ curl -s -X GET http://elasticsearch:9200/filebeat-*-${DATUM}/_search -H 'Content
      }
  }" | jq .hits.hits[]._source.log | sed 's/ /_/g' | sed 's/"/+/g' > /data/last3min.txt
 
-for line in `cat searches | sed 's/ /_/g' | sed 's/"/+/g'`
+for line in `cat /es-exporter/searches | sed 's/ /_/g' | sed 's/"/+/g'`
 do
 COUNT=`grep -c -i ${line} /data/last3min.txt`
 
