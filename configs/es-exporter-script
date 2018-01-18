@@ -1,0 +1,39 @@
+#!/bin/bash
+
+cd /es-exporter
+mkdir metrics 2>/dev/null
+nohup python -m SimpleHTTPServer 8080 >/dev/null 2>&1 &
+
+while sleep 15
+do
+
+DATUM="`date +%Y.%m.%d`"
+cat /dev/null > /tmp/newmetrics
+
+for line in `cat searches | sed 's/ /_/g' | sed 's/"/+/g'`
+do
+srchline="`echo ${line} | sed 's/_/ /g' | sed 's/+/"/g'`"
+
+#curl -s -X GET http://elasticsearch:9200/filebeat-*-${DATUM}/_search?pretty -H 'Content-Type: application/json' -d "
+#{
+#   \"query\": { \"wildcard\" :
+#      { \"log\" : \"*Aborted connection*\" }
+#    }
+#}" | grep '"log" : ' | sed 's/^.*log" : //' | sed 's/, *$//'
+
+curl -s -X GET http://elasticsearch:9200/filebeat-*-${DATUM}/_search?pretty -H 'Content-Type: application/json' -d "
+{
+   \"query\": { \"wildcard\" :
+      { \"log\" : \"*${srchline}*\" }
+    }
+}" | grep '"log" : ' | wc -l > /tmp/count
+
+COUNT=`cat /tmp/count`
+echo "logsrch_${line}" | sed "s/\$/ ${COUNT}/" > /tmp/output
+
+cat /tmp/output >> /tmp/newmetrics
+
+done
+cp /tmp/newmetrics /es-exporter/metrics/index.html
+
+done

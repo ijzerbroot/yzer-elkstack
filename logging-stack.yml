@@ -4,7 +4,6 @@ version: '3.4'
 # label the worker nodes
 # build kibana: localhost/kibana-logtrail:6.1.1
 
-
 configs:
   elastconf:
     external: true
@@ -12,33 +11,28 @@ configs:
 #    external: true
   fbyaml:
     external: true
-  kbsetup:
-    external: true
   kbyaml:
     external: true
   logtrailconfig:
     external: true
-  graylog.conf:
+  es-exporter-searches:
     external: true
-  graylog-log4j2.xml:
+  es-exporter-config:
+    external: true
+  es-exporter-script:
     external: true
 
 networks:
-  infra:
-    driver: overlay
-  traefik:
+  monitoring:
     external:
-      name: traefik
+      name: monitoring
+  lift-frontend:
+    external:
+      name: lift-frontend
 
 volumes:
     esdata:
       name: esdata
-    graylogconfig:
-      name: graylogconfig
-    graylogjournal:
-      name: graylogjournal
-    graylogmongodata:
-      name: graylogmongodata
 
 services:
 
@@ -46,6 +40,11 @@ services:
     image: docker.elastic.co/beats/filebeat:6.1.1
     deploy:
       mode: global
+      labels:
+        - "logspout.exclude=true"
+    labels:
+       org.label-schema.group: "monitoring"
+       logspout.exclude: "true"
     configs:
       - source: fbyaml
         target: /etc/filebeat.yml
@@ -57,34 +56,10 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-     - infra
+     - monitoring
     depends_on:
      - elasticsearch
 
-  elastalert-server:
-    image: bitsensor/elastalert:latest
-    configs:
-      - source: elastalert-config
-        target: /opt/elastalert/config.yaml
-        mode: 0644
-      - source: elastalert-rules
-        target: /opt/elastalert/rules/rules.yaml
-        mode: 0644
-      - source: elastalert-server-config
-        target: /opt/elastalert-server/config/config.json
-        mode: 0644
-    networks:
-      - infra
-    labels:
-      org.label-schema.group: "monitoring"
-    depends_on:
-      - elasticsearch
-    deploy:
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints:
-          - node.labels.elasticsearch != true
 
 # no longer necessary with telegraf and kapacitor
 #  metricbeater:
@@ -120,42 +95,47 @@ services:
     environment:
       ES_JAVA_OPTS: "-Xmx512m -Xms256m"
     networks:
-      - infra
+      - monitoring
     labels:
       org.label-schema.group: "monitoring"
+      logspout.exclude: "true"
     deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "logspout.exclude=true"
+      placement:
+        constraints:
+          - node.labels.elasticsearch == true
+
+  es-exporter:
+    image: localhost/es-exporter:1
+    configs:
+      - source: es-exporter-searches
+        target: /es-exporter/searches
+        mode: 0644
+      - source: es-exporter-config
+        target: /es-exporter/config
+        mode: 0644
+      - source: es-exporter-script
+        target: /es-exporter/run.sh
+        mode: 0755
+    networks:
+      - monitoring
+    labels:
+      org.label-schema.group: "monitoring"
+      logspout.exclude: "true"
+    command: /es-exporter/run.sh
+    depends_on:
+      - elasticsearch
+    deploy:
+      labels:
+        - "logspout.exclude=true"
       restart_policy:
         condition: on-failure
       placement:
         constraints:
           - node.labels.elasticsearch == true
-
-#  logstash:
-#    image: docker.elastic.co/logstash/logstash-oss:6.1.1
-#    configs:
-#      - source: lsconf
-#        target: /usr/share/logstash/pipeline/logstash.conf
-#        mode: 0644
-#      - source: lsyaml
-#        target: /usr/share/logstash/config/logstash.yml
-#        mode: 0644
-#      - source: lssetup
-#        target: /setup.sh
-#        mode: 0755
-#    ports:
-#      - "5000:5000"
-#      - "5044:5044"
-#    environment:
-#      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
-#      xpack.security.enabled: "false"
-#      LOGSPOUT: "ignore"
-#    entrypoint: /setup.sh
-#    depends_on:
-#      - elasticsearch
-#    networks:
-#      - elk
-#    labels:
-#      org.label-schema.group: "monitoring"
 
   kibana:
 #    image: docker.elastic.co/kibana/kibana-oss:6.1.1
@@ -165,30 +145,27 @@ services:
         target: /usr/share/kibana/config/kibana.yml
         mode: 0644
       - source: logtrailconfig
-        target: /tmp/logtrailconf
+        target: /usr/share/kibana/plugins/logtrail/logtrail.json
         mode: 0644
-      - source: kbsetup
-        target: /setup.sh
-        mode: 0755
-#    ports:
-#      - "5601"
     networks:
-      - infra
-      - traefik
+      - monitoring
+      - lift-frontend
     depends_on:
       - elasticsearch
 #    entrypoint: /setup.sh
     labels:
        org.label-schema.group: "monitoring"
+       logspout.exclude: "true"
     deploy:
       labels:
          - "traefik.port=5601"
-         - "traefik.docker.network=traefik"
+         - "traefik.docker.network=lift-frontend"
          - "traefik.backend=kibana"
          - "traefik.backend.loadbalancer.method=wrr"
          - "traefik.enable=true"
          - "traefik.frontend.entryPoints=management"
-         - "traefik.frontend.rule=Host:kibana.lift"
+         - "traefik.frontend.rule=Host:kibana.test.lift.cards"
+         - "logspout.exclude=true"
       replicas: 1
       placement:
         constraints:
