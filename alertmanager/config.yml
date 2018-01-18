@@ -21,13 +21,6 @@ route:
   # will remain at the root node and be dispatched to 'default-receiver'.
 
 receivers:
-    - name: 'default-receiver'
-      email_configs:
-        - send_resolved: true
-          html: '{{ template "email.default.html" . }}'
-          to: frank@lift.cards
-          from: alertmanager@swarm.test.lift.cards
-          smarthost: localhost
 
     - name: 'slack'
       slack_configs:
