@@ -14,7 +14,7 @@ services:
     image: traefik
     networks:
       - lift-frontend
-    command: --web --docker.swarmmode --docker.domain=swarmtest.lift.cards --docker.watch --docker.endpoint=unix://var/run/docker.sock --configfile=/config/traefik.toml -l WARN
+    command: --web --docker.swarmmode --docker.domain=swarmtest --docker.watch --docker.endpoint=unix://var/run/docker.sock --configfile=/config/traefik.toml -l WARN
     ports:
       - "80:80"
       - "8888:8888"

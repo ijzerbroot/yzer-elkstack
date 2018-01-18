@@ -164,7 +164,7 @@ services:
          - "traefik.backend.loadbalancer.method=wrr"
          - "traefik.enable=true"
          - "traefik.frontend.entryPoints=management"
-         - "traefik.frontend.rule=Host:kibana.test.lift.cards"
+         - "traefik.frontend.rule=Host:kibana.test"
          - "logspout.exclude=true"
       replicas: 1
       placement:

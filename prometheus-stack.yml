@@ -29,11 +29,12 @@ configs:
     external: true
 
 networks:
-  infra:
-    driver: overlay
-  traefik:
+  monitoring:
     external:
-      name: traefik
+      name: monitoring
+  lift-frontend:
+    external:
+      name: lift-frontend
 
 volumes:
     prometheus_data:
@@ -61,23 +62,28 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention=200h'
     networks:
-      - infra
-      - traefik
+      - monitoring
+      - lift-frontend
+    depends_on:
+      - nodeexporter
+      - cadvisor
     labels:
       org.label-schema.group: "monitoring"
+      logspout.exclude: "true"
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.labels.stacktype == monitoring
       labels:
+        - "logspout.exclude=true"
         - "traefik.port=9090"
-        - "traefik.docker.network=traefik"
+        - "traefik.docker.network=lift-frontend"
         - "traefik.backend=prometheus"
         - "traefik.backend.loadbalancer.method=wrr"
         - "traefik.enable=true"
         - "traefik.frontend.entryPoints=management"
-        - "traefik.frontend.rule=Host:prometheus.lift"
+        - "traefik.frontend.rule=Host:prometheus.test"
 
   alertmanager:
     image: prom/alertmanager
@@ -89,38 +95,26 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
     networks:
-      - infra
-      - traefik
+      - monitoring
+      - lift-frontend
     labels:
       org.label-schema.group: "monitoring"
+      logspout.exclude: "true"
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.labels.stacktype == monitoring
       labels:
+        - "logspout.exclude=true"
         - "org.label-schema.group=monitoring"
         - "traefik.port=9093"
-        - "traefik.docker.network=traefik"
+        - "traefik.docker.network=lift-frontend"
         - "traefik.backend=alertmanager"
         - "traefik.backend.loadbalancer.method=wrr"
         - "traefik.enable=true"
         - "traefik.frontend.entryPoints=management"
-        - "traefik.frontend.rule=Host:alertmanager.lift"
-
-  docker-exporter:
-    image: basi/socat:v1.15.0
-    networks:
-      - infra
-    deploy:
-      mode: global
-      resources:
-        limits:
-          cpus: '0.05'
-          memory: 64M
-        reservations:
-          cpus: '0.05'
-          memory: 32M
+        - "traefik.frontend.rule=Host:alertmanager.test"
 
   nodeexporter:
     image: stefanprodan/swarmprom-node-exporter
@@ -129,7 +123,7 @@ services:
         target: /customrun.sh
         mode: 0755
     networks:
-      - infra
+      - monitoring
     environment:
       - NODE_ID={{.Node.ID}}
     volumes:
@@ -147,11 +141,15 @@ services:
       - '-collectors.enabled=textfile,conntrack,diskstats,entropy,filefd,filesystem,loadavg,mdadm,meminfo,netdev,netstat,stat,time,vmstat'
     deploy:
       mode: global
+      labels:
+        - "logspout.exclude=true"
 
   cadvisor:
     image: google/cadvisor:v0.28.3
     deploy:
       mode: global
+      labels:
+        - "logspout.exclude=true"
       resources:
         limits:
           cpus: '0.20'
@@ -167,25 +165,14 @@ services:
       - /dev/disk/:/dev/disk:ro
 #      - /var/lib/lxcfs/cgroup:/cgroup:ro
     networks:
-      - infra
+      - monitoring
     labels:
       org.label-schema.group: "monitoring"
+      logspout.exclude: "true"
 
   grafana:
     image: grafana/grafana:4.6.0
     configs:
-      - source: grafanadash1
-        target: /docker_containers.json
-        mode: 0644
-      - source: grafanadash2
-        target: /docker_host.json
-        mode: 0644
-      - source: grafanadash3
-        target: /monitor_services.json
-        mode: 0644
-      - source: grafanadash4
-        target: /nginx_container.json
-        mode: 0644
       - source: grafanadash5
         target: /nodes_dash.json
         mode: 0644
@@ -209,42 +196,47 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     networks:
-      - infra
-      - traefik
+      - monitoring
+      - lift-frontend
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.role == worker
+          - node.labels.stacktype == monitoring
       labels:
         - "traefik.port=3000"
-        - "traefik.docker.network=traefik"
+        - "traefik.docker.network=lift-frontend"
         - "traefik.backend=grafana"
         - "traefik.backend.loadbalancer.method=wrr"
         - "traefik.enable=true"
         - "traefik.frontend.entryPoints=management"
-        - "traefik.frontend.rule=Host:grafana.lift"
+        - "traefik.frontend.rule=Host:grafana.test"
+        - "logspout.exclude=true"
 
   unsee:
     image: cloudflare/unsee:v0.8.0
+    labels:
+      logspout.exclude: "true"
     networks:
-      - traefik
-      - infra
+      - lift-frontend
+      - monitoring
     environment:
       - "ALERTMANAGER_URIS=default:http://alertmanager:9093"
+      - "LOG_LEVEL=error"
     deploy:
       mode: replicated
       replicas: 1
       labels:
         - "traefik.port=8080"
-        - "traefik.docker.network=traefik"
+        - "traefik.docker.network=lift-frontend"
         - "traefik.backend=unsee"
         - "traefik.backend.loadbalancer.method=wrr"
         - "traefik.enable=true"
         - "traefik.frontend.entryPoints=http"
-        - "traefik.frontend.rule=Host:unsee.lift"
+        - "traefik.frontend.rule=Host:unsee.test"
         - "traefik.http.frontend.entryPoints=management"
 #        - "traefik.http.port=80"
+        - "logspout.exclude=true"
 
 
 #  caddy:
