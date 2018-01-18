@@ -1,39 +1,37 @@
 #!/bin/bash
 
-cd /es-exporter
+cd /data
 mkdir metrics 2>/dev/null
 nohup python -m SimpleHTTPServer 8080 >/dev/null 2>&1 &
 
 while sleep 15
 do
 
-DATUM="`date +%Y.%m.%d`"
-cat /dev/null > /tmp/newmetrics
+cat /dev/null > /data/newmetrics
+DATUM="`%Y.%m.%d`"
+
+curl -s -X GET http://elasticsearch:9200/filebeat-*-${DATUM}/_search -H 'Content-Type: application/json' -d "
+{
+     \"from\" : 0, \"size\" : 1000,
+     \"query\": {
+         \"range\" : {
+             \"@timestamp\" : {
+                 \"gte\" : \"now-3m\",
+                 \"lt\" :  \"now\"
+             }
+         }
+     }
+ }" | jq .hits.hits[]._source.log | sed 's/ /_/g' | sed 's/"/+/g' > /data/last3min.txt
 
 for line in `cat searches | sed 's/ /_/g' | sed 's/"/+/g'`
 do
-srchline="`echo ${line} | sed 's/_/ /g' | sed 's/+/"/g'`"
+COUNT=`grep -c -i ${line} /data/last3min.txt`
 
-#curl -s -X GET http://elasticsearch:9200/filebeat-*-${DATUM}/_search?pretty -H 'Content-Type: application/json' -d "
-#{
-#   \"query\": { \"wildcard\" :
-#      { \"log\" : \"*Aborted connection*\" }
-#    }
-#}" | grep '"log" : ' | sed 's/^.*log" : //' | sed 's/, *$//'
+echo "logsrch_${line}" | sed "s/\$/ ${COUNT}/" > /data/output
 
-curl -s -X GET http://elasticsearch:9200/filebeat-*-${DATUM}/_search?pretty -H 'Content-Type: application/json' -d "
-{
-   \"query\": { \"wildcard\" :
-      { \"log\" : \"*${srchline}*\" }
-    }
-}" | grep '"log" : ' | wc -l > /tmp/count
-
-COUNT=`cat /tmp/count`
-echo "logsrch_${line}" | sed "s/\$/ ${COUNT}/" > /tmp/output
-
-cat /tmp/output >> /tmp/newmetrics
+cat /data/output >> /data/newmetrics
 
 done
-cp /tmp/newmetrics /es-exporter/metrics/index.html
+cp /data/newmetrics /data/metrics/index.html
 
 done

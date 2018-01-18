@@ -33,6 +33,8 @@ networks:
 volumes:
     esdata:
       name: esdata
+    es-exporterdata:
+      name: es-exporterdata
 
 services:
 
@@ -110,6 +112,8 @@ services:
 
   es-exporter:
     image: localhost/es-exporter:1
+    volumes:
+      - es-exporterdata:/data
     configs:
       - source: es-exporter-searches
         target: /es-exporter/searches
